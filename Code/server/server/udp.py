@@ -1,14 +1,13 @@
 import datetime
 import socket
-import threading
 from typing import List
 
 from glogger.logger import get_logger
 
-logger = get_logger('tcp')
+logger = get_logger('udp')
 
 
-def start_udp(port: int):
+def start(port: int):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind(('0.0.0.0', port))
     while True:
@@ -18,8 +17,8 @@ def start_udp(port: int):
     return s, addr
 
 
-def start_udp_throughput(port: int, period: int, upload: bool):
-    conn, addr = start_udp(port)
+def start_throughput(port: int, period: int, upload: bool):
+    conn, addr = start(port)
     logger.info("Start udp throughput with period: %d", period)
     now = datetime.datetime.now()
     recv_bytes = [0] * period
@@ -38,8 +37,8 @@ def start_udp_throughput(port: int, period: int, upload: bool):
     return recv_bytes
 
 
-def start_udp_latency(port: int, number_of_packets: int) -> List[int]:
-    conn, addr = start_udp(port)
+def start_latency(port: int, number_of_packets: int) -> List[int]:
+    conn, addr = start(port)
     logger.info("Start udp latency with %d packets", number_of_packets)
     result = []
     for i in range(number_of_packets):
