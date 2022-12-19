@@ -7,7 +7,7 @@ from glogger.logger import get_logger
 logger = get_logger('tcp')
 
 
-def start_tcp(port: int):
+def start(port: int):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(('0.0.0.0', port))
         s.listen()
@@ -16,9 +16,9 @@ def start_tcp(port: int):
         return conn
 
 
-def start_tcp_throughput(port: int, period: int, upload: bool) -> List[int]:
-    conn = start_tcp(port)
-    logger.info("Start tcp throughput with period: %d", period)
+def start_throughput(port: int, period: int, upload: bool) -> List[int]:
+    conn = start(port)
+    logger.info("Start tcp throughput with period: %d upload: %s", period, upload)
     now = datetime.datetime.now()
     recv_bytes = [0] * period
     while True:
@@ -36,8 +36,8 @@ def start_tcp_throughput(port: int, period: int, upload: bool) -> List[int]:
     return recv_bytes
 
 
-def start_tcp_latency(port: int, number_of_packets: int) -> List[int]:
-    conn = start_tcp(port)
+def start_latency(port: int, number_of_packets: int) -> List[int]:
+    conn = start(port)
     logger.info("Start tcp latency with %d packets", number_of_packets)
     result = []
     for i in range(number_of_packets):
