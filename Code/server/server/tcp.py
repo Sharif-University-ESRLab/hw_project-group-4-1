@@ -16,7 +16,7 @@ def start_tcp(port: int):
         return conn
 
 
-def start_tcp_throughput(port: int, period: int) -> List[int]:
+def start_tcp_throughput(port: int, period: int, upload: bool) -> List[int]:
     conn = start_tcp(port)
     logger.info("Start tcp throughput with period: %d", period)
     now = datetime.datetime.now()
@@ -25,9 +25,13 @@ def start_tcp_throughput(port: int, period: int) -> List[int]:
         total = (datetime.datetime.now() - now).total_seconds()
         if total >= period:
             break
-        data = conn.recv(1024)
-        recv_bytes[int(total)] += len(data)
-    logger.info("Result: %s", recv_bytes)
+        if upload:
+            data = conn.recv(1024)
+            recv_bytes[int(total)] += len(data)
+        else:
+            conn.sendall(b'*'*512)
+    if upload:
+        logger.info("Result: %s", recv_bytes)
     conn.close()
     return recv_bytes
 
