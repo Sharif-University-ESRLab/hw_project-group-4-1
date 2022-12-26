@@ -34,20 +34,20 @@ def start_throughput(port: int, period: int, upload: bool) -> List[int]:
     conn = start(port)
     logger.info("Start tcp throughput with period: %d upload: %s", period, upload)
     now = datetime.datetime.now()
-    recv_bytes = [0] * period
+    bytes_cnt = [0] * period
     while True:
         total = (datetime.datetime.now() - now).total_seconds()
         if total >= period:
             break
         if upload:
             data = conn.recv(1024)
-            recv_bytes[int(total)] += len(data)
+            bytes_cnt[int(total)] += len(data)
         else:
             conn.sendall(b'*'*512)
-    if upload:
-        logger.info("Result: %s", recv_bytes)
+            bytes_cnt[int(total)] += 512
+    logger.info("Result: %s", bytes_cnt)
     conn.close()
-    return recv_bytes
+    return bytes_cnt
 
 
 def start_latency(port: int, number_of_packets: int) -> List[int]:

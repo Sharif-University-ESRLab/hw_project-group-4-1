@@ -1,1 +1,4 @@
-This folder should contain the source code of your project.
+## Commands
+```commandline
+python server/main.py -p tcp -t download
+```
