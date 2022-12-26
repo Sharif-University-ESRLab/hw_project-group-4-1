@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "glogger"
+version = "1.0.0"
+description = ""
+authors = ["ArshiAAkhavan <letmemakenewone@gmail.com>","SmsS <smss.lite@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+mypy = "^0.961"
+coverage = "^6.4.2"
+pytest = "^7.1.2"
+safety = "^2.1.0"
+typeguard = "^2.13.3"
+xdoctest = "^1.0.1"
+Sphinx = "^5.0.2"
+pylint = "^2.14.4"
+black = "^22.6.0"
+pytype = "^2022.6.30"
+pytest-cov = "^3.0.0"
+pytest-mock = "^3.8.2"
+sphinx-autodoc-typehints = "^1.18.3"
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
