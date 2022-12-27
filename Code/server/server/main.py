@@ -1,12 +1,11 @@
 import argparse
-
+import udp
 from glogger.logger import get_logger
 from server import tcp
-
+import uploadserver
 PORT = 9999
 PERIOD = 10
 NUMBER_OF_PACKETS = 10
-
 
 def main():
     logger = get_logger('main')
@@ -42,6 +41,26 @@ def main():
             )
         else:
             tcp.start_latency(
+                port=PORT,
+                number_of_packets=NUMBER_OF_PACKETS,
+            )
+    elif protocol == 'udp':
+        if test == 'download':
+            # TCP, Download, Throughput
+            udp.start_throughput(
+                port=PORT,
+                period=PERIOD,
+                upload=False
+            )
+        elif test == 'upload':
+            # TCP, Upload, Throughput
+            udp.start_throughput(
+                port=PORT,
+                period=PERIOD,
+                upload=True
+            )
+        else:
+            udp.start_latency(
                 port=PORT,
                 number_of_packets=NUMBER_OF_PACKETS,
             )

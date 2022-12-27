@@ -10,8 +10,24 @@
 #define HOST_PORT (9999)            /// Server port
 
 #define BUFF_SIZE (512)             /// Size of buffer for reading from socket
+#define ARRAY_SIZE (30)             /// Size of array to store result
+
+/// protocols types
+#define TCP (1)
+#define UDP (2)
+#define HTTP (3)
+#define QUIC (4)
+/// tests types
+#define DOWNLOAD (5)
+#define UPLOAD (6)
+#define LATENCY (7)
+
+#define PROTOCOL (TCP)              /// protocol type
+#define TEST (DOWNLOAD)             /// test type
 
 char* buff = (char*)malloc(BUFF_SIZE);
+unsigned long st;
+int result_array[ARRAY_SIZE];
 
 /// Connect to wifi
 bool setupWifi() {
@@ -37,16 +53,33 @@ bool setupWifi() {
   return true;
 }
 
+void printResultArray() {
+  for (int i = 0; i < ARRAY_SIZE && result_array[i]; i++) {
+    Serial.printf("%d, ", result_array[i]);
+  }
+}
+
 void tcp() {
+  /// Init variables
+  st = millis();
+  
+  /// Connecting to server
   WiFiClient client;
   if (client.connect(HOST_IP, HOST_PORT)){  // connect to server
     Serial.println("Connected to server");
   }else{
     return;
   }
-  while (true) {
-    if(client.available())
-      client.read(buff, BUFF_SIZE);
+
+  /// Download test
+  if (TEST == DOWNLOAD) {
+    while (client.connected()) { 
+      if(client.available()) {
+        result_array[(millis()-st)/1000] += client.read(buff, BUFF_SIZE);
+      }
+    }
+    Serial.printf("TCP Download result:");
+    printResultArray();
   }
 }
 
@@ -60,7 +93,9 @@ void setup() {
     Serial.println("OK");
     digitalWrite(BUILT_IN_LED, LOW); // turn the LED on.
   }
-  tcp();
+  if (PROTOCOL == TCP)
+    tcp();
+  Serial.println("\nDone");
 }
 void loop() {
 }
