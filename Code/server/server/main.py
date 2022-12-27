@@ -14,6 +14,7 @@ FILE_SIZE = 512
 FILE_NAME = 'dummyFile'
 EMPTY_FILE_NAME = 'emptyDummyFile'
 
+
 def main():
     logger = get_logger('main')
     # Parse arguments
@@ -78,12 +79,16 @@ def main():
         sys.argv.append(str(PORT))
         os.system(f'dd if=/dev/zero of={FILE_NAME} bs={FILE_SIZE}MB count=1')
         os.system(f'touch {EMPTY_FILE_NAME}')
+
         # Clean dummy file
         def sigint_handler(_, __):
             logger.info("Cleaning dummy file")
             os.system(f'rm -f {FILE_NAME} {EMPTY_FILE_NAME}')
             sys.exit(0)
+
         signal.signal(signal.SIGINT, sigint_handler)
         uploadserver.main()
+
+
 if __name__ == '__main__':
     main()
