@@ -1,6 +1,6 @@
 #include <ESP8266WiFi.h>
-#include <Ethernet.h>
-#include <EthernetUdp.h>
+#include <WiFiUdp.h>
+
 
 
 #define BUILT_IN_LED (2)            /// GPID of built in led
@@ -27,6 +27,7 @@
 
 #define PROTOCOL (TCP)              /// protocol type
 #define TEST (DOWNLOAD)             /// test type
+
 
 char* buff = (char*)malloc(BUFF_SIZE);
 unsigned long st;

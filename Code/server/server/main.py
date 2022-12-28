@@ -7,7 +7,7 @@ from glogger.logger import get_logger
 from server import tcp
 import uploadserver
 
-PORT = 9997
+PORT = 9999
 PERIOD = 10
 NUMBER_OF_PACKETS = 10
 FILE_SIZE = 512
