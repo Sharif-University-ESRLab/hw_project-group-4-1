@@ -46,7 +46,7 @@ def start_throughput(port: int, period: int, upload: bool):
             data, _ = conn.recvfrom(1024)
             bytes_cnt[int(total)] += len(data)
         else:
-            conn.sendto(b'*'*512 + b'\0', addr)
+            conn.sendto(b'*'*512, addr)
             bytes_cnt[int(total)] += 512
     logger.info("Result: %s", bytes_cnt)
     conn.close()

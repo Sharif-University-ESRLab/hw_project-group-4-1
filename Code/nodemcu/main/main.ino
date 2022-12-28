@@ -8,10 +8,14 @@
 #define WIFI_DELAY (500)
 #define WIFI_SSID ("Redmi 8A")      /// Hotspot SSID
 #define WIFI_PASS ("Aa123QWE")      /// Hotspot Password
+#define LOCAL_UDP_PORT (10210)     /// local port to listen on
+#define MAX_PERIOD (15)
 
 #define HOST_IP ("185.18.214.189")  /// Server ip
 IPAddress hostIP(185, 18, 214, 189);
-#define HOST_PORT (9999)            /// Server port
+#define HOST_PORT (9999)            /// Server port\
+
+
 
 #define BUFF_SIZE (512)             /// Size of buffer for reading from socket
 #define ARRAY_SIZE (30)             /// Size of array to store result
@@ -101,18 +105,24 @@ void tcp() {
 }
 
 void udpTest() {
+  /// Initialize udp
+  st = millis();
+  udp.begin(LOCAL_UDP_PORT);
   udp.beginPacket(hostIP, HOST_PORT);
   udp.print("$");
   udp.endPacket();
-  for (int i = 0; i < 10; i++){
-    uint16_t packetSize = udp.parsePacket();              // Eingehende UDP-Pakete empfangen.
-    Serial.println(packetSize);
-    if (packetSize) {                                     // Prüfen ob UDP-Pakete empfangen wurden.
-      udp.read(buff, BUFF_SIZE);       // Einlesen des UDP Paket in den Bufffer.
-      buff[packetSize] = 0;                       // String Ende hinzufügen.
-      Serial.println(buff);                       // Visualisierung des empfangenen Packets.
+
+  if (TEST == DOWNLOAD){
+    while (true) {
+      uint16_t packetSize = udp.parsePacket();
+      result_array[(millis()-st)/1000] += packetSize;
+      if (packetSize)
+        Serial.println(packetSize);
+
+      if ((millis() - st) / 1000 > MAX_PERIOD)
+        break;
+        /// udp.read(buff, BUFF_SIZE);
     }
-    delay(1000);
   }
 }
 
