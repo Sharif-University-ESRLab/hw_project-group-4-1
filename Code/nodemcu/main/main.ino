@@ -102,6 +102,8 @@ void tcp() {
 
 void udpTest() {
   udp.beginPacket(hostIP, HOST_PORT);
+  udp.print("$");
+  udp.endPacket();
   for (int i = 0; i < 10; i++){
     uint16_t packetSize = udp.parsePacket();              // Eingehende UDP-Pakete empfangen.
     Serial.println(packetSize);
@@ -112,7 +114,6 @@ void udpTest() {
     }
     delay(1000);
   }
-  udp.endPacket();
 }
 
 

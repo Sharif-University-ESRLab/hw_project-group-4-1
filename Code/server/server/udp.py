@@ -21,7 +21,7 @@ def start(port: int):
         data, addr = s.recvfrom(1)
         if data is not None:
             break
-    return s, addr
+    return s, (addr[0], 10210)
 
 
 def start_throughput(port: int, period: int, upload: bool):
