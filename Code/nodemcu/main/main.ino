@@ -26,10 +26,12 @@
 #define LATENCY (7)
 
 #define PROTOCOL (TCP)              /// protocol type
-#define TEST (DOWNLOAD)             /// test type
+#define TEST (LATENCY)             /// test type
 
 
+WiFiUDP udp;
 char* buff = (char*)malloc(BUFF_SIZE);
+char* write_data = (char*)malloc(BUFF_SIZE);
 unsigned long st;
 int result_array[ARRAY_SIZE];
 
@@ -69,29 +71,50 @@ void tcp() {
   
   /// Connecting to server
   WiFiClient client;
-  if (client.connect(HOST_IP, HOST_PORT)){  // connect to server
-    Serial.println("Connected to server");
-  }else{
-    return;
-  }
+  while (!client.connect(HOST_IP, HOST_PORT));  // connect to server
+  Serial.println("Connected to server");
 
-  /// Download test
   if (TEST == DOWNLOAD) {
     while (client.connected()) { 
       if(client.available()) {
         result_array[(millis()-st)/1000] += client.read(buff, BUFF_SIZE);
       }
     }
-    Serial.printf("TCP Download result:");
+    Serial.printf("TCP download result:");
     printResultArray();
+  }else if(TEST == UPLOAD) {
+    while (client.connected()) { 
+      result_array[(millis()-st)/1000] += client.write(write_data, BUFF_SIZE);
+      client.flush();
+    }
+    Serial.printf("TCP upload result:");
+    printResultArray();
+  }else {
+    for (int i = 0; client.connected(); i++) {
+      Serial.println("1");
+      while (client.connected() && !client.available());
+      Serial.println("2");
+      client.read(buff, BUFF_SIZE);
+      Serial.println("3");
+      client.write(write_data, 1);
+      Serial.println("4");
+      client.flush();
+      Serial.println("5");
+    }
   }
 }
+
+
 
 void setup() {
   ESP.eraseConfig(); /// this make esp faster
   Serial.begin(9600);
   delay(10); /// waits for Serial to begin
   digitalWrite(BUILT_IN_LED, HIGH); /// turn the LED off.
+  for (int i = 0; i < BUFF_SIZE; i++) {
+    write_data[i] = '$';
+  }
+  write_data[BUFF_SIZE-1] = '\0';
   bool ok = true;
   if (setupWifi()) {
     Serial.println("OK");

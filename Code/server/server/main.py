@@ -31,7 +31,7 @@ def main():
     protocol: str = args.protocol
     test: str = args.test
 
-    logger.info("Protocol: %s, test: %s", protocol, test)
+    logger.info("Protocol: %s, test: %s, port: %d", protocol, test, PORT)
 
     if protocol == 'tcp':
         if test == 'download':
