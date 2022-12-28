@@ -31,7 +31,7 @@ IPAddress hostIP(185, 18, 214, 189);
 #define LATENCY (7)
 
 #define PROTOCOL (UDP)              /// protocol type
-#define TEST (LATENCY)             /// test type
+#define TEST (UPLOAD)             /// test type
 
 
 WiFiUDP udp;
@@ -111,17 +111,22 @@ void udpTest() {
   udp.beginPacket(hostIP, HOST_PORT);
   udp.print("$");
   udp.endPacket();
+  Serial.println("Connected");
 
   if (TEST == DOWNLOAD){
-    while (true) {
+    while ((millis() - st) / 1000 < MAX_PERIOD) {
       uint16_t packetSize = udp.parsePacket();
       result_array[(millis()-st)/1000] += packetSize;
       if (packetSize)
-        Serial.println(packetSize);
-
-      if ((millis() - st) / 1000 > MAX_PERIOD)
-        break;
-        /// udp.read(buff, BUFF_SIZE);
+        udp.read(buff, packetSize);
+    }
+    Serial.printf("UDP download result:");
+    printResultArray();
+  }else if (TEST == UPLOAD) {
+    while ((millis() - st) / 1000 < MAX_PERIOD) {
+      udp.beginPacket(hostIP, HOST_PORT);
+      udp.print("$$$$$$$$$$$$$$$$$$$$$$");
+      udp.endPacket();
     }
   }
 }

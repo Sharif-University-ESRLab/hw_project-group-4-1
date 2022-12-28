@@ -14,19 +14,20 @@ def start(port: int):
     Args:
         port: socket port
     """
-
+    logger.info("Waiting for udp socket")
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind(('0.0.0.0', port))
     while True:
         data, addr = s.recvfrom(1)
         if data is not None:
             break
+    logger.info("Found udp socket")
     return s, (addr[0], 10210)
 
 
 def start_throughput(port: int, period: int, upload: bool):
     """
-    Start a udp socket server to test throughput
+    Start an udp socket server to test throughput
 
     Args:
         port: socket port
