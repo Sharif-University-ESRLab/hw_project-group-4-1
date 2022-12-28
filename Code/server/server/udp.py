@@ -35,7 +35,7 @@ def start_throughput(port: int, period: int, upload: bool):
     """
 
     conn, addr = start(port)
-    logger.info("Start udp throughput with period: %d", period)
+    logger.info("Start udp throughput with period: %d, addr: %s", period,  addr)
     now = datetime.datetime.now()
     bytes_cnt = [0] * period
     while True:
@@ -46,7 +46,7 @@ def start_throughput(port: int, period: int, upload: bool):
             data, _ = conn.recvfrom(1024)
             bytes_cnt[int(total)] += len(data)
         else:
-            conn.sendto(b'*'*512, addr)
+            conn.sendto(b'*'*512 + b'\0', addr)
             bytes_cnt[int(total)] += 512
     logger.info("Result: %s", bytes_cnt)
     conn.close()

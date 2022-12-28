@@ -10,6 +10,7 @@
 #define WIFI_PASS ("Aa123QWE")      /// Hotspot Password
 
 #define HOST_IP ("185.18.214.189")  /// Server ip
+IPAddress hostIP(185, 18, 214, 189);
 #define HOST_PORT (9999)            /// Server port
 
 #define BUFF_SIZE (512)             /// Size of buffer for reading from socket
@@ -25,7 +26,7 @@
 #define UPLOAD (6)
 #define LATENCY (7)
 
-#define PROTOCOL (TCP)              /// protocol type
+#define PROTOCOL (UDP)              /// protocol type
 #define TEST (LATENCY)             /// test type
 
 
@@ -91,17 +92,27 @@ void tcp() {
     printResultArray();
   }else {
     for (int i = 0; client.connected(); i++) {
-      Serial.println("1");
       while (client.connected() && !client.available());
-      Serial.println("2");
       client.read(buff, BUFF_SIZE);
-      Serial.println("3");
       client.write(write_data, 1);
-      Serial.println("4");
       client.flush();
-      Serial.println("5");
     }
   }
+}
+
+void udpTest() {
+  udp.beginPacket(hostIP, HOST_PORT);
+  for (int i = 0; i < 10; i++){
+    uint16_t packetSize = udp.parsePacket();              // Eingehende UDP-Pakete empfangen.
+    Serial.println(packetSize);
+    if (packetSize) {                                     // Prüfen ob UDP-Pakete empfangen wurden.
+      udp.read(buff, BUFF_SIZE);       // Einlesen des UDP Paket in den Bufffer.
+      buff[packetSize] = 0;                       // String Ende hinzufügen.
+      Serial.println(buff);                       // Visualisierung des empfangenen Packets.
+    }
+    delay(1000);
+  }
+  udp.endPacket();
 }
 
 
@@ -122,6 +133,8 @@ void setup() {
   }
   if (PROTOCOL == TCP)
     tcp();
+  else if (PROTOCOL == UDP)
+    udpTest();
   Serial.println("\nDone");
 }
 void loop() {
