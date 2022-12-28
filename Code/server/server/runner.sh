@@ -11,6 +11,9 @@ python server/main.py -p udp -t latency
 # HTTP
 python server/main.py -p http
 
+# Quic
+python server/quic/http3_server.py --certificate cert.pem --private-key cert.key
+
 # Download
 python -m http.server
 

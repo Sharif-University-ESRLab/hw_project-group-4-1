@@ -1,4 +1,7 @@
 #include <ESP8266WiFi.h>
+#include <Ethernet.h>
+#include <EthernetUdp.h>
+
 
 #define BUILT_IN_LED (2)            /// GPID of built in led
 #define WIFI_WAIT_TIME (10000)      /// Wait time for connecting to wifi

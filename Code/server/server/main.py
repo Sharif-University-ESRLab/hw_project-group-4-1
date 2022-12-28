@@ -55,20 +55,21 @@ def main():
             )
     elif protocol == 'udp':
         if test == 'download':
-            # TCP, Download, Throughput
+            # UDP, Download, Throughput
             udp.start_throughput(
                 port=PORT,
                 period=PERIOD,
                 upload=False
             )
         elif test == 'upload':
-            # TCP, Upload, Throughput
+            # UDP, Upload, Throughput
             udp.start_throughput(
                 port=PORT,
                 period=PERIOD,
                 upload=True
             )
         else:
+            # UDP, Latency
             udp.start_latency(
                 port=PORT,
                 number_of_packets=NUMBER_OF_PACKETS,
@@ -77,7 +78,9 @@ def main():
         import sys
         sys.argv = sys.argv[:1]
         sys.argv.append(str(PORT))
+        # Creating a huge file to test download
         os.system(f'dd if=/dev/zero of={FILE_NAME} bs={FILE_SIZE}MB count=1')
+        # Creating an empty file to test latency
         os.system(f'touch {EMPTY_FILE_NAME}')
 
         # Clean dummy file
