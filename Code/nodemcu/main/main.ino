@@ -10,6 +10,7 @@
 #define WIFI_PASS ("Aa123QWE")      /// Hotspot Password
 #define LOCAL_UDP_PORT (10210)     /// local port to listen on
 #define MAX_PERIOD (15)
+#define MAX_PACKETS (15)
 
 #define HOST_IP ("185.18.214.189")  /// Server ip
 IPAddress hostIP(185, 18, 214, 189);
@@ -31,7 +32,7 @@ IPAddress hostIP(185, 18, 214, 189);
 #define LATENCY (7)
 
 #define PROTOCOL (UDP)              /// protocol type
-#define TEST (UPLOAD)             /// test type
+#define TEST (DOWNLOAD)             /// test type
 
 
 WiFiUDP udp;
@@ -104,29 +105,38 @@ void tcp() {
   }
 }
 
+void sendSingleChar() {
+  udp.beginPacket(hostIP, HOST_PORT);
+  udp.print("$");
+  udp.endPacket();
+}
+
 void udpTest() {
   /// Initialize udp
   st = millis();
   udp.begin(LOCAL_UDP_PORT);
-  udp.beginPacket(hostIP, HOST_PORT);
-  udp.print("$");
-  udp.endPacket();
-  Serial.println("Connected");
-
+  sendSingleChar();
+  
   if (TEST == DOWNLOAD){
     while ((millis() - st) / 1000 < MAX_PERIOD) {
       uint16_t packetSize = udp.parsePacket();
-      result_array[(millis()-st)/1000] += packetSize;
+      /// result_array[(millis()-st)/1000] += packetSize;
       if (packetSize)
-        udp.read(buff, packetSize);
+        result_array[(millis()-st)/1000] += udp.read(buff, packetSize);
     }
     Serial.printf("UDP download result:");
     printResultArray();
   }else if (TEST == UPLOAD) {
     while ((millis() - st) / 1000 < MAX_PERIOD) {
       udp.beginPacket(hostIP, HOST_PORT);
-      udp.print("$$$$$$$$$$$$$$$$$$$$$$");
+      udp.print(write_data);
       udp.endPacket();
+      delay(1); /// to avoid run time error
+    }
+  }else {
+    for (int i = 0; i < MAX_PACKETS; i++) {
+      while (!udp.parsePacket());
+      sendSingleChar();
     }
   }
 }
