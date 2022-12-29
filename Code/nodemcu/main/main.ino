@@ -9,7 +9,7 @@
 #define WIFI_WAIT_TIME (10000)      /// Wait time for connecting to wifi
 #define WIFI_DELAY (500)
 #define WIFI_SSID  ("Xiaomi_08C5")/// ("Redmi 8A")      /// Hotspot SSID
-#define WIFI_PASS  // ("Aa123QWE")      /// Hotspot Password
+#define WIFI_PASS // ("Aa123QWE")      /// Hotspot Password
 #define LOCAL_UDP_PORT (10210)     /// local port to listen on
 #define MAX_PERIOD (15)
 #define MAX_PACKETS (15)
