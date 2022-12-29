@@ -1,20 +1,26 @@
 #include <ESP8266WiFi.h>
-#include <WiFiUdp.h>
+#include <WiFiUdp.h>                /// for UDP socket
+#include <ESP8266HTTPClient.h>
+// #include <FS.h>
 
 
 
 #define BUILT_IN_LED (2)            /// GPID of built in led
 #define WIFI_WAIT_TIME (10000)      /// Wait time for connecting to wifi
 #define WIFI_DELAY (500)
-#define WIFI_SSID ("Redmi 8A")      /// Hotspot SSID
+#define WIFI_SSID  ("Redmi 8A")      /// Hotspot SSID
 #define WIFI_PASS ("Aa123QWE")      /// Hotspot Password
 #define LOCAL_UDP_PORT (10210)     /// local port to listen on
 #define MAX_PERIOD (15)
 #define MAX_PACKETS (15)
 
+
 #define HOST_IP ("185.18.214.189")  /// Server ip
 IPAddress hostIP(185, 18, 214, 189);
-#define HOST_PORT (9999)            /// Server port\
+#define HOST_PORT (9999)            /// Server port
+#define HTTP_URL ("http://185.18.214.189:9999")
+#define HTTP_DOWNLOAD_PATH ("http://185.18.214.189:9999/dummyFile")
+#define HTTP_LATENCY_PATH ("http://185.18.214.189:9999/emptyDummyFile")
 
 
 
@@ -31,7 +37,7 @@ IPAddress hostIP(185, 18, 214, 189);
 #define UPLOAD (6)
 #define LATENCY (7)
 
-#define PROTOCOL (UDP)              /// protocol type
+#define PROTOCOL (HTTP)              /// protocol type
 #define TEST (DOWNLOAD)             /// test type
 
 
@@ -142,6 +148,56 @@ void udpTest() {
 }
 
 
+//these callbacks will be invoked to read and write data to sdcard
+//and process response
+//and showing progress 
+int responsef(uint8_t *buffer, int len){
+  Serial.printf("%s\n", buffer);
+  return 0;
+}
+
+int rdataf(uint8_t *buffer, int len){
+  //read file to upload
+  return len;
+}
+
+int wdataf(uint8_t *buffer, int len){
+  //write downloaded data to file
+  return len;
+  // return root.write(buffer, len);
+}
+
+void progressf(int percent){
+  Serial.printf("%d\n", percent);
+}
+
+void httpTest() {
+  WiFiClient client;
+  HTTPClient http;
+  st = millis();
+  if (TEST == DOWNLOAD) {
+    Serial.println(HTTP_DOWNLOAD_PATH);
+    http.begin(client, HTTP_DOWNLOAD_PATH);
+    int httpCode = http.GET();
+    Serial.println(httpCode);
+    int len = http.getSize();
+    Serial.println(len);
+    WiFiClient* stream = &client;
+    while (http.connected() && (len > 0 || len == -1) && (millis()-st)/1000 <= MAX_PERIOD) {
+      int c = stream->readBytes(buff, (size_t)min(len, BUFF_SIZE));
+      if (!c) {
+        Serial.println("read timeout");
+      }
+      if (len > 0) {
+        len -= c;
+        result_array[(millis()-st)/1000] += c;
+      }
+      
+    }
+    Serial.printf("HTTP download result:");
+    printResultArray();
+  }
+}
 
 void setup() {
   ESP.eraseConfig(); /// this make esp faster
@@ -161,6 +217,8 @@ void setup() {
     tcp();
   else if (PROTOCOL == UDP)
     udpTest();
+  else if (PROTOCOL == HTTP)
+    httpTest();
   Serial.println("\nDone");
 }
 void loop() {
