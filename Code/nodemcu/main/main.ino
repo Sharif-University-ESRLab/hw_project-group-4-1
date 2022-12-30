@@ -7,11 +7,11 @@
 #define BUILT_IN_LED (2)            /// GPID of built in led
 #define WIFI_WAIT_TIME (10000)      /// Wait time for connecting to wifi
 #define WIFI_DELAY (500)
-#define WIFI_SSID  ("Xiaomi_08C5")/// ("Redmi 8A")      /// Hotspot SSID
-#define WIFI_PASS    // ("Aa123QWE")      /// Hotspot Password
+#define WIFI_SSID   ("Redmi 8A")      /// Hotspot SSID
+#define WIFI_PASS  ("Aa123QWE")      /// Hotspot Password
 #define LOCAL_UDP_PORT (10210)     /// local port to listen on
 #define MAX_PERIOD (15)
-#define MAX_PACKETS (15)
+#define MAX_PACKETS (10)
 
 
 #define HOST_IP ("185.18.214.189")  /// Server ip
@@ -24,7 +24,7 @@ IPAddress hostIP(185, 18, 214, 189);
 
 
 
-#define BUFF_SIZE (2500)             /// Size of buffer for reading from socket
+#define BUFF_SIZE (2123)             /// Size of buffer for reading from socket
 #define ARRAY_SIZE (30)             /// Size of array to store result
 
 /// protocols types
@@ -33,12 +33,14 @@ IPAddress hostIP(185, 18, 214, 189);
 #define HTTP (3)
 
 /// tests types
-#define DOWNLOAD (5)
-#define UPLOAD (6)
-#define LATENCY (7)
+#define DOWNLOAD (1)
+#define UPLOAD (2)
+#define LATENCY (3)
 
-#define PROTOCOL (TCP)              /// protocol type
-#define TEST (DOWNLOAD)             /// test type
+// #define PROTOCOL (TCP)              /// protocol type
+// #define TEST (DOWNLOAD)             /// test type
+int PROTOCOL = -1;
+int TEST = -1;
 
 
 WiFiUDP udp;
@@ -72,7 +74,7 @@ bool setupWifi() {
 }
 
 void printResultArray() {
-  for (int i = 0; i < ARRAY_SIZE && result_array[i]; i++) {
+  for (int i = 0; i < ARRAY_SIZE; i++) {
     Serial.printf("%d, ", result_array[i]);
   }
 }
@@ -137,7 +139,7 @@ void udpTest() {
       udp.beginPacket(hostIP, HOST_PORT);
       udp.print(write_data);
       udp.endPacket();
-      delay(1); /// to avoid run time error
+      delay(10); /// to avoid run time error
     }
   } else {
     for (int i = 0; i < MAX_PACKETS; i++) {
@@ -197,13 +199,18 @@ void httpTest() {
     Serial.printf("HTTP download result:");
     printResultArray();
   } else if (TEST == LATENCY) {
-    WiFiClient client;
-    HTTPClient http;
-    st = millis();
-    http.begin(client, HTTP_LATENCY_PATH);
-    Serial.printf("Result latency: %d\n", millis() - st);
-    int httpCode = http.GET();
-    Serial.println(httpCode);
+    for (int i = 0; i < 10; i++) {
+      WiFiClient client;
+      HTTPClient http;
+      st = millis();
+      http.begin(client, HTTP_LATENCY_PATH);
+      int httpCode = http.GET();
+      result_array[i] = millis() - st;
+      Serial.printf("Result latency: %d\n", millis() - st);
+
+      Serial.println(httpCode);
+    }
+    printResultArray();
   } else {
     Serial.println("Upload HTTP test");
     WiFiClient client;
@@ -226,6 +233,23 @@ void httpTest() {
   }
 }
 
+
+/// Read 1-digit integer from input
+int next() {
+  while (true) {
+    if (Serial.available() ) {
+      int res = Serial.read();
+      if ('0' <= res && res <= '9')
+        return res - '0';
+    }
+  }
+}
+
+void initArray() {
+  for (int i = 0; i < ARRAY_SIZE; i++)
+    result_array[i] = 0;
+}
+
 void setup() {
   ESP.eraseConfig(); /// this makes esp faster
   Serial.begin(9600);
@@ -241,14 +265,25 @@ void setup() {
     digitalWrite(BUILT_IN_LED, LOW); // turn the LED on.
   }
 
+  while (true) {
+    initArray();
+    Serial.println("1: TCP\n2: UDP\n3: HTTP");
+    while (Serial.available() == 0);
+    PROTOCOL = next();
+    Serial.println("1: Download\n2: Upload\n3: Latency");
+    while (Serial.available() == 0);
+    TEST = next();
+    Serial.printf("P: %d T: %d\n", PROTOCOL, TEST);
 
-  if (PROTOCOL == TCP)
-    tcp();
-  else if (PROTOCOL == UDP)
-    udpTest();
-  else if (PROTOCOL == HTTP)
-    httpTest();
-  Serial.println("\nDone");
+
+    if (PROTOCOL == TCP)
+      tcp();
+    else if (PROTOCOL == UDP)
+      udpTest();
+    else if (PROTOCOL == HTTP)
+      httpTest();
+    Serial.println("\nDone");
+  }
 }
 void loop() {
 }
