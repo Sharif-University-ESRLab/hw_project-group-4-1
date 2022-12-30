@@ -25,7 +25,7 @@ def start(port: int):
     return s, (addr[0], 10210)
 
 
-def start_throughput(port: int, period: int, upload: bool):
+def start_throughput(port: int, period: int, upload: bool, packet_size: int):
     """
     Start an udp socket server to test throughput
 
@@ -33,6 +33,7 @@ def start_throughput(port: int, period: int, upload: bool):
         port: socket port
         period: time of test in seconds
         upload: test upload or download
+        packet_size: size of packets
     """
 
     conn, addr = start(port)
@@ -44,10 +45,10 @@ def start_throughput(port: int, period: int, upload: bool):
         if total >= period:
             break
         if upload:
-            data, _ = conn.recvfrom(1024)
+            data, _ = conn.recvfrom(packet_size)
             bytes_cnt[int(total)] += len(data)
         else:
-            conn.sendto(b'*'*512, addr)
+            conn.sendto(b'*'*packet_size, addr)
             bytes_cnt[int(total)] += 512
     logger.info("Result: %s", bytes_cnt)
     conn.close()

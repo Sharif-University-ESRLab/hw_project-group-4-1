@@ -13,6 +13,7 @@ NUMBER_OF_PACKETS = 10
 FILE_SIZE = 512
 FILE_NAME = 'dummyFile'
 EMPTY_FILE_NAME = 'emptyDummyFile'
+PACKET_SIZE = 100_000
 
 
 def main():
@@ -39,14 +40,16 @@ def main():
             tcp.start_throughput(
                 port=PORT,
                 period=PERIOD,
-                upload=False
+                upload=False,
+                packet_size=PACKET_SIZE,
             )
         elif test == 'upload':
             # TCP, Upload, Throughput
             tcp.start_throughput(
                 port=PORT,
                 period=PERIOD,
-                upload=True
+                upload=True,
+                packet_size=PACKET_SIZE,
             )
         else:
             tcp.start_latency(
@@ -59,14 +62,16 @@ def main():
             udp.start_throughput(
                 port=PORT,
                 period=PERIOD,
-                upload=False
+                upload=False,
+                packet_size=PACKET_SIZE,
             )
         elif test == 'upload':
             # UDP, Upload, Throughput
             udp.start_throughput(
                 port=PORT,
                 period=PERIOD,
-                upload=True
+                upload=True,
+                packet_size=PACKET_SIZE,
             )
         else:
             # UDP, Latency

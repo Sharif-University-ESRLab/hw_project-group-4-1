@@ -22,7 +22,7 @@ def start(port: int):
         return conn
 
 
-def start_throughput(port: int, period: int, upload: bool) -> List[int]:
+def start_throughput(port: int, period: int, upload: bool, packet_size: int) -> List[int]:
     """
     Start a tcp socket server to test throughput
 
@@ -30,6 +30,7 @@ def start_throughput(port: int, period: int, upload: bool) -> List[int]:
         port: socket port
         period: time of test in seconds
         upload: test upload or download
+        packet_size: size of packets to send
     """
     conn = start(port)
     logger.info("Start tcp throughput with period: %d upload: %s", period, upload)
@@ -40,10 +41,10 @@ def start_throughput(port: int, period: int, upload: bool) -> List[int]:
         if total >= period:
             break
         if upload:
-            data = conn.recv(1024)
+            data = conn.recv(packet_size)
             bytes_cnt[int(total)] += len(data)
         else:
-            conn.sendall(b'*'*512)
+            conn.sendall(b'*'*packet_size)
             bytes_cnt[int(total)] += 512
     logger.info("Result: %s", bytes_cnt)
     conn.close()
