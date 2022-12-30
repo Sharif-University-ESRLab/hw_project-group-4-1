@@ -45,7 +45,7 @@ def start_throughput(port: int, period: int, upload: bool, packet_size: int) -> 
             bytes_cnt[int(total)] += len(data)
         else:
             conn.sendall(b'*'*packet_size)
-            bytes_cnt[int(total)] += 512
+            bytes_cnt[int(total)] += packet_size
     logger.info("Result: %s", bytes_cnt)
     conn.close()
     return bytes_cnt

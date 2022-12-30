@@ -13,7 +13,7 @@ NUMBER_OF_PACKETS = 10
 FILE_SIZE = 512
 FILE_NAME = 'dummyFile'
 EMPTY_FILE_NAME = 'emptyDummyFile'
-PACKET_SIZE = 100_000
+PACKET_SIZE = 25_000
 
 
 def main():
