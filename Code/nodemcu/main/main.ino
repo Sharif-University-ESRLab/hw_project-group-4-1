@@ -49,7 +49,7 @@ unsigned long start_time_ms;
 int result_array[TEST_SIZE];
 
 /// Connect to wifi
-bool setupWifi() {
+bool setup_wifi() {
   Serial.printf("connecting to %s\n", WIFI_SSID);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
   int i = 0;
@@ -284,11 +284,12 @@ void setup() {
   // Fill upload_buffer with random data.
   generate_upload_data(upload_buffer, BUFF_SIZE);
 
-  if (setupWifi()) {
+  if (setup_wifi()) {
     Serial.println("OK");
     digitalWrite(BUILT_IN_LED, LOW); // turn the LED on.
   }
 }
+
 void loop() {
   initArray();
   Serial.println("1: TCP\n2: UDP\n3: HTTP");
