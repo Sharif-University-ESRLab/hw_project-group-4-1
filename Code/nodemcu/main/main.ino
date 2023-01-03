@@ -44,7 +44,7 @@ int TEST = -1;
 
 WiFiUDP udp;
 char *buff = (char *)malloc(BUFF_SIZE);
-char *write_data = (char *)malloc(BUFF_SIZE);
+char *upload_data = (char *)malloc(BUFF_SIZE);
 unsigned long start_time_ms;
 int result_array[TEST_SIZE];
 
@@ -101,7 +101,7 @@ void tcp() {
   } else if (TEST == UPLOAD) {
     while (client.connected()) {
       result_array[(millis() - start_time_ms) / 1000] +=
-          client.write(write_data, BUFF_SIZE);
+          client.write(upload_data, BUFF_SIZE);
       client.flush();
     }
     Serial.printf("TCP upload result:");
@@ -111,7 +111,7 @@ void tcp() {
       while (client.connected() && !client.available())
         ;
       client.read(buff, BUFF_SIZE);
-      client.write(write_data, 1);
+      client.write(upload_data, 1);
       client.flush();
     }
   }
@@ -142,7 +142,7 @@ void udpTest() {
   } else if (TEST == UPLOAD) {
     while ((millis() - start_time_ms) / 1000 < MAX_PERIOD) {
       udp.beginPacket(hostIP, HOST_PORT);
-      udp.print(write_data);
+      udp.print(upload_data);
       udp.endPacket();
       delay(10); /// to avoid run time error
     }
@@ -236,7 +236,7 @@ void httpTest() {
     while (client.connected() &&
            (millis() - start_time_ms) / 1000 <= MAX_PERIOD) {
       result_array[(millis() - start_time_ms) / 1000] +=
-          client.write(write_data, BUFF_SIZE);
+          client.write(upload_data, BUFF_SIZE);
       client.flush();
     }
     client.write("\r\n------------------------75717ac272b4c37a\r\n");
@@ -262,15 +262,29 @@ void initArray() {
     result_array[i] = 0;
 }
 
-void setup() {
-  ESP.eraseConfig(); /// this makes esp faster
-  Serial.begin(9600);
-  delay(10);                        /// waits for Serial to begin
-  digitalWrite(BUILT_IN_LED, HIGH); /// turn the LED off.
-  for (int i = 0; i < BUFF_SIZE; i++) {
-    write_data[i] = '$';
+void generate_upload_data(char* buffer,int buffer_len){
+  for(int i=0;i<buffer_len-1;i++){
+    buffer[i]='$';
   }
-  write_data[BUFF_SIZE - 1] = '\0';
+
+  // NULL-Terminate the buffer.
+  buffer[buffer_len - 1] = '\0';
+
+}
+
+void setup() {
+  /// Make esp work Faster.
+  ESP.eraseConfig();
+
+  /// Starting Serial input for user comminiucation.
+  Serial.begin(9600);
+  /// waits for Serial to begin.
+  delay(10);                        
+
+  /// turn the LED off.
+  digitalWrite(BUILT_IN_LED, HIGH);
+
+  generate_upload_data(upload_data, BUFF_SIZE);
   bool ok = true;
   if (setupWifi()) {
     Serial.println("OK");
