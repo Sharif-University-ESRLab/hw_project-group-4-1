@@ -23,7 +23,7 @@ IPAddress hostIP(185, 18, 214, 189); /// Server IP
 #define HTTP_UPLOAD_PATH ("http://185.18.214.189:9999/upload")
 
 #define BUFF_SIZE (2123) /// Size of buffer for reading from socket
-#define ARRAY_SIZE (30)  /// Number of samples
+#define TEST_SIZE (30)  /// Number of samples
 
 /// Protocols types
 enum Protocol {
@@ -46,7 +46,7 @@ WiFiUDP udp;
 char *buff = (char *)malloc(BUFF_SIZE);
 char *write_data = (char *)malloc(BUFF_SIZE);
 unsigned long start_time_ms;
-int result_array[ARRAY_SIZE];
+int result_array[TEST_SIZE];
 
 /// Connect to wifi
 bool setupWifi() {
@@ -74,7 +74,7 @@ bool setupWifi() {
 }
 
 void printResultArray() {
-  for (int i = 0; i < ARRAY_SIZE; i++) {
+  for (int i = 0; i < TEST_SIZE; i++) {
     Serial.printf("%d, ", result_array[i]);
   }
 }
@@ -92,7 +92,8 @@ void tcp() {
   if (TEST == DOWNLOAD) {
     while (client.connected()) {
       if (client.available()) {
-        result_array[(millis() - start_time_ms) / 1000] += client.read(buff, BUFF_SIZE);
+        result_array[(millis() - start_time_ms) / 1000] +=
+            client.read(buff, BUFF_SIZE);
       }
     }
     Serial.printf("TCP download result:");
@@ -133,7 +134,8 @@ void udpTest() {
       uint16_t packetSize = udp.parsePacket();
       /// result_array[(millis()-st)/1000] += packetSize;
       if (packetSize)
-        result_array[(millis() - start_time_ms) / 1000] += udp.read(buff, packetSize);
+        result_array[(millis() - start_time_ms) / 1000] +=
+            udp.read(buff, packetSize);
     }
     Serial.printf("UDP download result:");
     printResultArray();
@@ -231,7 +233,8 @@ void httpTest() {
                  "image/jpeg\r\n\r\n\n\n\n");
     client.flush();
     int i = 0;
-    while (client.connected() && (millis() - start_time_ms) / 1000 <= MAX_PERIOD) {
+    while (client.connected() &&
+           (millis() - start_time_ms) / 1000 <= MAX_PERIOD) {
       result_array[(millis() - start_time_ms) / 1000] +=
           client.write(write_data, BUFF_SIZE);
       client.flush();
@@ -255,7 +258,7 @@ int next() {
 }
 
 void initArray() {
-  for (int i = 0; i < ARRAY_SIZE; i++)
+  for (int i = 0; i < TEST_SIZE; i++)
     result_array[i] = 0;
 }
 
