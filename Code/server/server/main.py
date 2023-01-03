@@ -14,7 +14,7 @@ NUMBER_OF_PACKETS = 10  # Number of packets to send for latenccy test
 FILE_SIZE = 512  # File size of http download test
 FILE_NAME = 'dummyFile'  # Name of file to test download for http
 EMPTY_FILE_NAME = 'emptyDummyFile'  # Name of file to test latency for http
-PACKET_SIZE = 2000  # Size of packets to send and recieve
+PACKET_SIZE = 2000  # Size of packets to send and receive
 
 
 def main():
