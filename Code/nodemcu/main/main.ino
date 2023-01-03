@@ -264,7 +264,7 @@ void initArray() {
 
 void generate_upload_data(char *buffer, int buffer_len) {
 
-  memset(buffer,'$',buffer_len-2);
+  memset(buffer, '$', buffer_len - 2);
   // NULL-Terminate the buffer.
   buffer[buffer_len - 1] = '\0';
 }
