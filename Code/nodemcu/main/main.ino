@@ -273,26 +273,24 @@ void setup() {
     Serial.println("OK");
     digitalWrite(BUILT_IN_LED, LOW); // turn the LED on.
   }
-
-  while (true) {
-    initArray();
-    Serial.println("1: TCP\n2: UDP\n3: HTTP");
-    while (Serial.available() == 0)
-      ;
-    PROTOCOL = next();
-    Serial.println("1: Download\n2: Upload\n3: Latency");
-    while (Serial.available() == 0)
-      ;
-    TEST = next();
-    Serial.printf("P: %d T: %d\n", PROTOCOL, TEST);
-
-    if (PROTOCOL == TCP)
-      tcp();
-    else if (PROTOCOL == UDP)
-      udpTest();
-    else if (PROTOCOL == HTTP)
-      httpTest();
-    Serial.println("\nDone");
-  }
 }
-void loop() {}
+void loop() {
+  initArray();
+  Serial.println("1: TCP\n2: UDP\n3: HTTP");
+  while (Serial.available() == 0)
+    ;
+  PROTOCOL = next();
+  Serial.println("1: Download\n2: Upload\n3: Latency");
+  while (Serial.available() == 0)
+    ;
+  TEST = next();
+  Serial.printf("P: %d T: %d\n", PROTOCOL, TEST);
+
+  if (PROTOCOL == TCP)
+    tcp();
+  else if (PROTOCOL == UDP)
+    udpTest();
+  else if (PROTOCOL == HTTP)
+    httpTest();
+  Serial.println("\nDone");
+}
