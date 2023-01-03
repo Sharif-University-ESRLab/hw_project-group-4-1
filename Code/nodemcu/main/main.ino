@@ -270,19 +270,20 @@ void generate_upload_data(char *buffer, int buffer_len) {
 }
 
 void setup() {
-  /// Make esp work Faster.
+  // Make esp work Faster.
   ESP.eraseConfig();
 
-  /// Starting Serial input for user comminiucation.
+  // Starting Serial input for user comminiucation.
   Serial.begin(9600);
-  /// waits for Serial to begin.
+  // Waits for Serial to begin.
   delay(10);
 
-  /// turn the LED off.
+  // Turn the LED off.
   digitalWrite(BUILT_IN_LED, HIGH);
 
+  // Fill upload_buffer with random data.
   generate_upload_data(upload_buffer, BUFF_SIZE);
-  bool ok = true;
+
   if (setupWifi()) {
     Serial.println("OK");
     digitalWrite(BUILT_IN_LED, LOW); // turn the LED on.
