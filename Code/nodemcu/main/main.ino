@@ -92,14 +92,14 @@ void tcp() {
   if (TEST == DOWNLOAD) {
     while (client.connected()) {
       if (client.available()) {
-        result_array[(millis() - st) / 1000] += client.read(buff, BUFF_SIZE);
+        result_array[(millis() - start_time_ms) / 1000] += client.read(buff, BUFF_SIZE);
       }
     }
     Serial.printf("TCP download result:");
     printResultArray();
   } else if (TEST == UPLOAD) {
     while (client.connected()) {
-      result_array[(millis() - st) / 1000] +=
+      result_array[(millis() - start_time_ms) / 1000] +=
           client.write(write_data, BUFF_SIZE);
       client.flush();
     }
@@ -133,7 +133,7 @@ void udpTest() {
       uint16_t packetSize = udp.parsePacket();
       /// result_array[(millis()-st)/1000] += packetSize;
       if (packetSize)
-        result_array[(millis() - st) / 1000] += udp.read(buff, packetSize);
+        result_array[(millis() - start_time_ms) / 1000] += udp.read(buff, packetSize);
     }
     Serial.printf("UDP download result:");
     printResultArray();
@@ -187,14 +187,14 @@ void httpTest() {
     Serial.println(len);
     WiFiClient *stream = &client;
     while (http.connected() && (len > 0 || len == -1) &&
-           (millis() - st) / 1000 <= MAX_PERIOD) {
+           (millis() - start_time_ms) / 1000 <= MAX_PERIOD) {
       int c = stream->readBytes(buff, (size_t)min(len, BUFF_SIZE));
       if (!c) {
         Serial.println("read timeout");
       }
       if (len > 0) {
         len -= c;
-        result_array[(millis() - st) / 1000] += c;
+        result_array[(millis() - start_time_ms) / 1000] += c;
       }
     }
     Serial.printf("HTTP download result:");
@@ -207,7 +207,7 @@ void httpTest() {
       http.begin(client, HTTP_LATENCY_PATH);
       int httpCode = http.GET();
       result_array[i] = millis() - start_time_ms;
-      Serial.printf("Result latency: %d\n", millis() - st);
+      Serial.printf("Result latency: %d\n", millis() - start_time_ms);
 
       Serial.println(httpCode);
     }
@@ -231,8 +231,8 @@ void httpTest() {
                  "image/jpeg\r\n\r\n\n\n\n");
     client.flush();
     int i = 0;
-    while (client.connected() && (millis() - st) / 1000 <= MAX_PERIOD) {
-      result_array[(millis() - st) / 1000] +=
+    while (client.connected() && (millis() - start_time_ms) / 1000 <= MAX_PERIOD) {
+      result_array[(millis() - start_time_ms) / 1000] +=
           client.write(write_data, BUFF_SIZE);
       client.flush();
     }
