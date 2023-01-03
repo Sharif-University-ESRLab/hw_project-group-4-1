@@ -44,8 +44,6 @@ enum TestType {
 int PROTOCOL = -1;
 int TEST = -1;
 
-char *buff = (char *)malloc(BUFF_SIZE);
-char *upload_buffer = (char *)malloc(BUFF_SIZE);
 int result_array[TEST_SIZE];
 
 /// Connect to wifi
@@ -85,6 +83,13 @@ void printResultArray() {
 }
 
 void tcp_test() {
+
+  char download_buffer[BUFF_SIZE];
+  char upload_buffer[BUFF_SIZE];
+
+  // Fill upload_buffer with random data.
+  generate_upload_data(upload_buffer, BUFF_SIZE);
+
   // Capture start time
   unsigned long start_time_ms = millis();
 
@@ -95,17 +100,30 @@ void tcp_test() {
   Serial.println("Connected to server");
 
   switch (TEST) {
+  /// In order to test TCP connection in Download mode
+  /// we simply need to wait for new packet and read 
+  /// all the bytes, sent by the server.
+  /// We measure the number of bytes read in each second
+  /// and report the result in a maximum range of 30 seconds.
+  /// Note: server might close the connection before 30 seconds
+  /// and thus, some indices in the resulting array might be zero.
   case DOWNLOAD:
     while (client.connected()) {
       while (client.connected() && !client.available())
         ;
-      int bytes_read = client.read(buff, BUFF_SIZE);
+      int bytes_read = client.read(download_buffer, BUFF_SIZE);
       unsigned long end_time_ms = millis();
       result_array[(end_time_ms - start_time_ms) / 1000] += bytes_read;
     }
     Serial.printf("TCP download result:");
     printResultArray();
     break;
+  /// Similar to the DOWNLOAD case, all we have to do is to 
+  /// send buffers of loaded data through an already established
+  /// TCP connection and measure the timing. It is also worthy to
+  /// mention the `client.flush()` function which grantees that 
+  /// each call to `client.write()` would result in a Network IO
+  /// and thus, grantees the sanity of our experiment.
   case UPLOAD:
     while (client.connected()) {
       int bytes_read = client.write(upload_buffer, BUFF_SIZE);
@@ -116,11 +134,14 @@ void tcp_test() {
     Serial.printf("TCP upload result:");
     printResultArray();
     break;
+  /// For testing the LATENCY, as long as we have the hold of the
+  /// connection, we repeat sending, and receiving packets and
+  /// measure the RTT for its latency.
   case LATENCY:
     while (client.connected()) {
       while (client.connected() && !client.available())
         ;
-      client.read(buff, BUFF_SIZE);
+      client.read(download_buffer, BUFF_SIZE);
       client.write(upload_buffer, 1);
       client.flush();
     }
@@ -148,6 +169,10 @@ void udp_send_packet(WiFiUDP *udp, char *buffer) {
 
 void udp_test() {
 
+  char upload_buffer[BUFF_SIZE];
+  char download_buffer[BUFF_SIZE];
+
+
   // Handler for UDP connection.
   WiFiUDP udp;
 
@@ -163,15 +188,15 @@ void udp_test() {
 
   switch (TEST) {
   /// In this case, we send as much packet as we can in a
-  /// CONN_TIME_OUT window and store the amount of bytes 
-  /// transfered in each second in the result_array for 
+  /// CONN_TIME_OUT window and store the amount of bytes
+  /// transfered in each second in the result_array for
   /// further analyzes.
   case DOWNLOAD:
     while ((millis() - start_time_ms) / 1000 < CONN_TIME_OUT) {
       uint16_t packetSize = udp.parsePacket();
       unsigned long end_time_ms = millis();
       if (packetSize) {
-        int bytes_read = udp.read(buff, packetSize);
+        int bytes_read = udp.read(download_buffer, packetSize);
         result_array[(end_time_ms - start_time_ms) / 1000] += bytes_read;
       }
     }
@@ -182,9 +207,9 @@ void udp_test() {
   /// Unlike TCP, we can not meassure transfered bytes in
   /// the client side of the connection. This is due to the
   /// fact that UDP packet loss is not trackable from client
-  /// side of the connection. So what we do instead is that 
+  /// side of the connection. So what we do instead is that
   /// we simple send the packets as much as we can and trust
-  /// the server with the calculation and analytics, since 
+  /// the server with the calculation and analytics, since
   /// server has all the data it needs.
   case UPLOAD:
     while ((millis() - start_time_ms) / 1000 < CONN_TIME_OUT) {
@@ -209,6 +234,12 @@ void udp_test() {
 
 void http_test() {
 
+  char upload_buffer[BUFF_SIZE];
+  char download_buffer[BUFF_SIZE];
+
+  // Fill upload_buffer with random data.
+  generate_upload_data(upload_buffer, BUFF_SIZE);
+
   unsigned long start_time_ms = millis();
   switch (TEST) {
   case DOWNLOAD: {
@@ -222,7 +253,7 @@ void http_test() {
     WiFiClient *stream = &client;
     while (http.connected() && (len > 0 || len == -1) &&
            (millis() - start_time_ms) / 1000 <= CONN_TIME_OUT) {
-      int c = stream->readBytes(buff, (size_t)min(len, BUFF_SIZE));
+      int c = stream->readBytes(download_buffer, (size_t)min(len, BUFF_SIZE));
       if (!c) {
         Serial.println("read timeout");
       }
@@ -315,9 +346,6 @@ void setup() {
   // Turn the LED off.
   pinMode(BUILT_IN_LED, OUTPUT);
   digitalWrite(BUILT_IN_LED, HIGH);
-
-  // Fill upload_buffer with random data.
-  generate_upload_data(upload_buffer, BUFF_SIZE);
 
   if (setup_wifi()) {
     Serial.println("Wifi connection is setup!");
