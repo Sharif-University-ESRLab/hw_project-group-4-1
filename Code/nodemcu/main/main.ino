@@ -68,9 +68,11 @@ bool setup_wifi() {
     return false;
   }
 
+  // Configure wifi connection.
   WiFi.mode(WIFI_STA);
   WiFi.setAutoReconnect(true);
   WiFi.persistent(true);
+
   Serial.println("Connection established!");
   Serial.print("IP address:\t");
   Serial.println(WiFi.localIP());
@@ -83,7 +85,7 @@ void printResultArray() {
   }
 }
 
-void tcp() {
+void tcp_test() {
   /// Init variables
   start_time_ms = millis();
 
@@ -127,7 +129,7 @@ void sendSingleChar() {
   udp.endPacket();
 }
 
-void udpTest() {
+void udp_test() {
   /// Initialize udp
   start_time_ms = millis();
   udp.begin(LOCAL_UDP_PORT);
@@ -180,7 +182,7 @@ int wdataf(uint8_t *buffer, int len) {
 
 void progressf(int percent) { Serial.printf("%d\n", percent); }
 
-void httpTest() {
+void http_test() {
 
   start_time_ms = millis();
   if (TEST == DOWNLOAD) {
@@ -261,11 +263,6 @@ int next() {
   }
 }
 
-void initArray() {
-  for (int i = 0; i < TEST_SIZE; i++)
-    result_array[i] = 0;
-}
-
 void generate_upload_data(char *buffer, int buffer_len) {
 
   memset(buffer, '$', buffer_len - 2);
@@ -295,9 +292,7 @@ void setup() {
     digitalWrite(BUILT_IN_LED, LOW);
   }
 }
-
-void loop() {
-  initArray();
+void show_menu(){
   Serial.println("1: TCP\n2: UDP\n3: HTTP");
   while (Serial.available() == 0)
     ;
@@ -308,11 +303,24 @@ void loop() {
   TEST = next();
   Serial.printf("P: %d T: %d\n", PROTOCOL, TEST);
 
-  if (PROTOCOL == TCP)
-    tcp();
-  else if (PROTOCOL == UDP)
-    udpTest();
-  else if (PROTOCOL == HTTP)
-    httpTest();
+}
+void loop() {
+  memset(result_array, 0, TEST_SIZE);
+  show_menu();
+
+  switch (PROTOCOL) {
+    case TCP:
+      tcp_test();
+      break;
+    case UDP:
+      udp_test();
+      break;
+    case HTTP:
+      http_test();
+      break;
+    default:
+      Serial.println("protocol not supported! pleas try again");
+      break;
+  }
   Serial.println("\nDone");
 }
