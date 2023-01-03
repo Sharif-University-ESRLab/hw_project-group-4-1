@@ -58,7 +58,8 @@ bool setup_wifi() {
   int tries_left = WIFI_CONN_TRY_COUNT;
   while (WiFi.status() != WL_CONNECTED && tries_left) {
     delay(WIFI_CONN_CHK_INTERVAL);
-    Serial.printf("retrying [%d]", WIFI_CONN_TRY_COUNT - tries_left);
+    Serial.printf("retrying [%d]\n", WIFI_CONN_TRY_COUNT - tries_left);
+    tries_left--;
   }
   // Didn't make the connection.
   if (!tries_left) {
