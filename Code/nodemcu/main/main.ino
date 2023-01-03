@@ -283,6 +283,7 @@ void setup() {
   delay(10);
 
   // Turn the LED off.
+  pinMode(BUILT_IN_LED, OUTPUT);
   digitalWrite(BUILT_IN_LED, HIGH);
 
   // Fill upload_buffer with random data.
