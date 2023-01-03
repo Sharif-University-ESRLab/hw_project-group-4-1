@@ -31,7 +31,7 @@ IPAddress hostIP(185, 18, 214, 189);  /// Server IP
 #define ARRAY_SIZE (30)             /// Number of samples
 
 /// Protocols types
-enum Protocolx{
+enum Protocol{
     TCP=1,
     UDP=2,
     HTTP=3,
