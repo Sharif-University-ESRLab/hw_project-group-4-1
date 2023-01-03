@@ -6,6 +6,7 @@
 
 #define WIFI_INIT_READY_DALY (10000) /// Wait time for connecting to wifi
 #define WIFI_CONN_CHK_INTERVAL (500) /// Interval for checking wifi connection
+#define WIFI_CONN_TRY_COUNT (20)     /// Number of tries to connect to wifi
 #define WIFI_SSID ("Redmi 8A")       /// Hotspot SSID
 #define WIFI_PASS ("Aa123QWE")       /// Hotspot Password
 
@@ -52,18 +53,20 @@ int result_array[TEST_SIZE];
 bool setup_wifi() {
   Serial.printf("connecting to %s\n", WIFI_SSID);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
-  int i = 0;
-  while (WiFi.status() != WL_CONNECTED) { // Wait for the Wi-Fi to connect
+
+  // Wait for the Wi-Fi to connect
+  int tries_left = WIFI_CONN_TRY_COUNT;
+  while (WiFi.status() != WL_CONNECTED && tries_left) {
     delay(WIFI_CONN_CHK_INTERVAL);
-    Serial.print(++i);
-    Serial.print(' ');
-    if (i == WIFI_INIT_READY_DALY / WIFI_CONN_CHK_INTERVAL) {
-      Serial.println("Failed to connect");
-      WiFi.disconnect();
-      return false;
-    }
-    Serial.println("retry");
+    Serial.printf("retrying [%d]", WIFI_CONN_TRY_COUNT - tries_left);
   }
+  // Didn't make the connection.
+  if (!tries_left) {
+    Serial.println("Failed to connect");
+    WiFi.disconnect();
+    return false;
+  }
+
   WiFi.mode(WIFI_STA);
   WiFi.setAutoReconnect(true);
   WiFi.persistent(true);
@@ -287,8 +290,8 @@ void setup() {
   if (setup_wifi()) {
     Serial.println("Wifi connection is setup!");
     // Turn the LED on.
-    // Show that the System is up and running. 
-    digitalWrite(BUILT_IN_LED, LOW); 
+    // Show that the System is up and running.
+    digitalWrite(BUILT_IN_LED, LOW);
   }
 }
 
