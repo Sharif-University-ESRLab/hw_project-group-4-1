@@ -31,18 +31,18 @@ IPAddress hostIP(185, 18, 214, 189);  /// Server IP
 #define ARRAY_SIZE (30)             /// Number of samples
 
 /// Protocols types
-enum Protocol{
+enum Protocolx{
     TCP=1,
     UDP=2,
     HTTP=3,
-}
+};
 
 /// Tests types
 enum TestType{
   DOWNLOAD=1,
   UPLOAD=2,
   LATENCY=3,
-}
+};
 
 // #define PROTOCOL (TCP)              /// protocol type
 // #define TEST (DOWNLOAD)             /// test type
