@@ -101,7 +101,7 @@ void tcp_test() {
 
   switch (TEST) {
   /// In order to test TCP connection in Download mode
-  /// we simply need to wait for new packet and read 
+  /// we simply need to wait for new packet and read
   /// all the bytes, sent by the server.
   /// We measure the number of bytes read in each second
   /// and report the result in a maximum range of 30 seconds.
@@ -118,10 +118,10 @@ void tcp_test() {
     Serial.printf("TCP download result:");
     printResultArray();
     break;
-  /// Similar to the DOWNLOAD case, all we have to do is to 
+  /// Similar to the DOWNLOAD case, all we have to do is to
   /// send buffers of loaded data through an already established
   /// TCP connection and measure the timing. It is also worthy to
-  /// mention the `client.flush()` function which grantees that 
+  /// mention the `client.flush()` function which grantees that
   /// each call to `client.write()` would result in a Network IO
   /// and thus, grantees the sanity of our experiment.
   case UPLOAD:
@@ -171,7 +171,6 @@ void udp_test() {
 
   char upload_buffer[BUFF_SIZE];
   char download_buffer[BUFF_SIZE];
-
 
   // Handler for UDP connection.
   WiFiUDP udp;
@@ -266,21 +265,7 @@ void http_test() {
     printResultArray();
 
   } break;
-  case UPLOAD:
-    for (int i = 0; i < 10; i++) {
-      WiFiClient client;
-      HTTPClient http;
-      start_time_ms = millis();
-      http.begin(client, HTTP_LATENCY_PATH);
-      int http_code = http.GET();
-      result_array[i] = millis() - start_time_ms;
-      Serial.printf("Result latency: %d\n", millis() - start_time_ms);
-
-      Serial.println(http_code);
-    }
-    printResultArray();
-    break;
-  case LATENCY: {
+  case UPLOAD: {
     Serial.println("Upload HTTP test");
     WiFiClient client;
     while (!client.connect(HOST_IP, HOST_PORT))
@@ -311,6 +296,20 @@ void http_test() {
     printResultArray();
 
   } break;
+  case LATENCY:
+    for (int i = 0; i < 10; i++) {
+      WiFiClient client;
+      HTTPClient http;
+      start_time_ms = millis();
+      http.begin(client, HTTP_LATENCY_PATH);
+      int http_code = http.GET();
+      result_array[i] = millis() - start_time_ms;
+      Serial.printf("Result latency: %d\n", millis() - start_time_ms);
+
+      Serial.println(http_code);
+    }
+    printResultArray();
+    break;
   default:
     break;
   }
