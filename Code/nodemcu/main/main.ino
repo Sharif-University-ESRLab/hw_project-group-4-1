@@ -44,7 +44,6 @@ enum TestType {
 int PROTOCOL = -1;
 int TEST = -1;
 
-WiFiUDP udp;
 char *buff = (char *)malloc(BUFF_SIZE);
 char *upload_buffer = (char *)malloc(BUFF_SIZE);
 int result_array[TEST_SIZE];
@@ -131,27 +130,42 @@ void tcp_test() {
   }
 }
 
-void upd_send_single_char() {
-  udp.beginPacket(hostIP, HOST_PORT);
-  udp.print("$");
-  udp.endPacket();
+/// Sends a single '$' character trough the UDP handle
+/// passed down to the function.
+void udp_send_single_char(WiFiUDP *udp) {
+  udp->beginPacket(hostIP, HOST_PORT);
+  udp->print("$");
+  udp->endPacket();
 }
 
-void udp_send_packet(char *buffer) {
-  udp.beginPacket(hostIP, HOST_PORT);
-  udp.print(buffer);
-  udp.endPacket();
+/// Sends the provided buffer as a UDP packet via the
+/// UDP handle passed down to the function.
+void udp_send_packet(WiFiUDP *udp, char *buffer) {
+  udp->beginPacket(hostIP, HOST_PORT);
+  udp->print(buffer);
+  udp->endPacket();
 }
 
 void udp_test() {
 
+  // Handler for UDP connection.
+  WiFiUDP udp;
+
   // Capture start time
   unsigned long start_time_ms = millis();
 
+  // Create UDP socket from server.
   udp.begin(LOCAL_UDP_PORT);
-  upd_send_single_char();
+
+  // Sign server that we are ready to start the experiment.
+  // we do this by sending a single $ character.
+  udp_send_single_char(&udp);
 
   switch (TEST) {
+  /// In this case, we send as much packet as we can in a
+  /// CONN_TIME_OUT window and store the amount of bytes 
+  /// transfered in each second in the result_array for 
+  /// further analyzes.
   case DOWNLOAD:
     while ((millis() - start_time_ms) / 1000 < CONN_TIME_OUT) {
       uint16_t packetSize = udp.parsePacket();
@@ -164,17 +178,28 @@ void udp_test() {
     Serial.printf("UDP download result:");
     printResultArray();
     break;
+
+  /// Unlike TCP, we can not meassure transfered bytes in
+  /// the client side of the connection. This is due to the
+  /// fact that UDP packet loss is not trackable from client
+  /// side of the connection. So what we do instead is that 
+  /// we simple send the packets as much as we can and trust
+  /// the server with the calculation and analytics, since 
+  /// server has all the data it needs.
   case UPLOAD:
     while ((millis() - start_time_ms) / 1000 < CONN_TIME_OUT) {
-      udp_send_packet(upload_buffer);
+      udp_send_packet(&udp, upload_buffer);
       delay(UDP_DELAY_TIME); /// to avoid run time error
     }
     break;
+  /// Similar to the UPLOAD case, we can only send MAX_PACKETS
+  /// number of packets and leave all the analytics to the server
+  /// side code.
   case LATENCY:
     for (int i = 0; i < MAX_PACKETS; i++) {
       while (!udp.parsePacket())
         ;
-      upd_send_single_char();
+      udp_send_single_char(&udp);
     }
     break;
   default:
