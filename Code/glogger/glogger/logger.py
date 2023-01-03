@@ -97,7 +97,7 @@ class LoggerFormatter(logging.Formatter):
 def get_logger(
     name: str,
     level: int = logging.NOTSET,
-    split: str = " ",
+    split: str = "=",
     show_func: bool = False,
     emphasize_from: int = logging.ERROR,
 ) -> logging.Logger:
