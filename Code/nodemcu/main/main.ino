@@ -2,21 +2,23 @@
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h> /// for UDP socket
 
-#define BUILT_IN_LED (2) /// GPID of built in led
+#define BUILT_IN_LED (2) /// GPID of built in led.
 
-#define WIFI_INIT_READY_DALY (10000) /// Wait time for connecting to wifi
-#define WIFI_CONN_CHK_INTERVAL (500) /// Interval for checking wifi connection
-#define WIFI_CONN_TRY_COUNT (20)     /// Number of tries to connect to wifi
-#define WIFI_SSID ("Redmi 8A")       /// Hotspot SSID
-#define WIFI_PASS ("Aa123QWE")       /// Hotspot Password
+#define WIFI_INIT_READY_DALY (10000) /// Wait time for connecting to wifi.
+#define WIFI_CONN_CHK_INTERVAL (500) /// Interval for checking wifi connection.
+#define WIFI_CONN_TRY_COUNT (20)     /// Number of tries to connect to wifi.
+#define WIFI_SSID ("Redmi 8A")       /// Hotspot SSID.
+#define WIFI_PASS ("Aa123QWE")       /// Hotspot Password.
 
-#define LOCAL_UDP_PORT (10210) /// Local port to listen on
-#define CONN_TIME_OUT (15)     /// Maximum time each test would take
-#define MAX_PACKETS (10)       /// Maximum number of packet sent/received
+#define LOCAL_UDP_PORT (10210) /// Local port to listen on.
+#define CONN_TIME_OUT (15)     /// Maximum time each test would take.
+#define UDP_DELAY_TIME 10       /// time between two UDP packet transfer.
+#define MAX_PACKETS (10)       /// Maximum number of packet sent/received.
 
-IPAddress hostIP(185, 18, 214, 189); /// Server IP
-#define HOST_IP ("185.18.214.189")   /// Server IP
-#define HOST_PORT (9999)             /// Server port
+IPAddress hostIP(185, 18, 214, 189); /// Server IP.
+#define HOST_IP ("185.18.214.189")   /// Server IP.
+#define HOST_PORT (9999)             /// Server port.
+
 
 #define HTTP_URL ("http://185.18.214.189:9999")
 #define HTTP_DOWNLOAD_PATH ("http://185.18.214.189:9999/dummyFile")
@@ -162,7 +164,7 @@ void udp_test() {
       udp.beginPacket(hostIP, HOST_PORT);
       udp.print(upload_buffer);
       udp.endPacket();
-      delay(10); /// to avoid run time error
+      delay(UDP_DELAY_TIME); /// to avoid run time error
     }
     break;
   case LATENCY:
@@ -177,26 +179,7 @@ void udp_test() {
   }
 }
 
-// these callbacks will be invoked to read and write data to sdcard
-// and process response
-// and showing progress
-int responsef(uint8_t *buffer, int len) {
-  Serial.printf("%s\n", buffer);
-  return 0;
-}
 
-int rdataf(uint8_t *buffer, int len) {
-  // read file to upload
-  return len;
-}
-
-int wdataf(uint8_t *buffer, int len) {
-  // write downloaded data to file
-  return len;
-  // return root.write(buffer, len);
-}
-
-void progressf(int percent) { Serial.printf("%d\n", percent); }
 
 void http_test() {
 
