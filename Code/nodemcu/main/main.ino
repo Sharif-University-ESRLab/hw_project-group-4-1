@@ -6,6 +6,7 @@
 
 #define WIFI_INIT_READY_DALY (10000) /// Wait time for connecting to wifi
 #define WIFI_CONN_CHK_INTERVAL (500) /// Interval for checking wifi connection
+#define WIFI_CONN_TRY_COUNT (20)     /// Number of tries to connect to wifi
 #define WIFI_SSID ("Redmi 8A")       /// Hotspot SSID
 #define WIFI_PASS ("Aa123QWE")       /// Hotspot Password
 
@@ -23,7 +24,7 @@ IPAddress hostIP(185, 18, 214, 189); /// Server IP
 #define HTTP_UPLOAD_PATH ("http://185.18.214.189:9999/upload")
 
 #define BUFF_SIZE (2123) /// Size of buffer for reading from socket
-#define ARRAY_SIZE (30)  /// Number of samples
+#define TEST_SIZE (30)   /// Number of samples
 
 /// Protocols types
 enum Protocol {
@@ -44,26 +45,28 @@ int TEST = -1;
 
 WiFiUDP udp;
 char *buff = (char *)malloc(BUFF_SIZE);
-char *write_data = (char *)malloc(BUFF_SIZE);
+char *upload_buffer = (char *)malloc(BUFF_SIZE);
 unsigned long start_time_ms;
-int result_array[ARRAY_SIZE];
+int result_array[TEST_SIZE];
 
 /// Connect to wifi
-bool setupWifi() {
+bool setup_wifi() {
   Serial.printf("connecting to %s\n", WIFI_SSID);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
-  int i = 0;
-  while (WiFi.status() != WL_CONNECTED) { // Wait for the Wi-Fi to connect
+
+  // Wait for the Wi-Fi to connect
+  int tries_left = WIFI_CONN_TRY_COUNT;
+  while (WiFi.status() != WL_CONNECTED && tries_left) {
     delay(WIFI_CONN_CHK_INTERVAL);
-    Serial.print(++i);
-    Serial.print(' ');
-    if (i == WIFI_INIT_READY_DALY / WIFI_CONN_CHK_INTERVAL) {
-      Serial.println("Failed to connect");
-      WiFi.disconnect();
-      return false;
-    }
-    Serial.println("retry");
+    Serial.printf("retrying [%d]", WIFI_CONN_TRY_COUNT - tries_left);
   }
+  // Didn't make the connection.
+  if (!tries_left) {
+    Serial.println("Failed to connect");
+    WiFi.disconnect();
+    return false;
+  }
+
   WiFi.mode(WIFI_STA);
   WiFi.setAutoReconnect(true);
   WiFi.persistent(true);
@@ -74,7 +77,7 @@ bool setupWifi() {
 }
 
 void printResultArray() {
-  for (int i = 0; i < ARRAY_SIZE; i++) {
+  for (int i = 0; i < TEST_SIZE; i++) {
     Serial.printf("%d, ", result_array[i]);
   }
 }
@@ -92,7 +95,8 @@ void tcp() {
   if (TEST == DOWNLOAD) {
     while (client.connected()) {
       if (client.available()) {
-        result_array[(millis() - start_time_ms) / 1000] += client.read(buff, BUFF_SIZE);
+        result_array[(millis() - start_time_ms) / 1000] +=
+            client.read(buff, BUFF_SIZE);
       }
     }
     Serial.printf("TCP download result:");
@@ -100,7 +104,7 @@ void tcp() {
   } else if (TEST == UPLOAD) {
     while (client.connected()) {
       result_array[(millis() - start_time_ms) / 1000] +=
-          client.write(write_data, BUFF_SIZE);
+          client.write(upload_buffer, BUFF_SIZE);
       client.flush();
     }
     Serial.printf("TCP upload result:");
@@ -110,7 +114,7 @@ void tcp() {
       while (client.connected() && !client.available())
         ;
       client.read(buff, BUFF_SIZE);
-      client.write(write_data, 1);
+      client.write(upload_buffer, 1);
       client.flush();
     }
   }
@@ -133,14 +137,15 @@ void udpTest() {
       uint16_t packetSize = udp.parsePacket();
       /// result_array[(millis()-st)/1000] += packetSize;
       if (packetSize)
-        result_array[(millis() - start_time_ms) / 1000] += udp.read(buff, packetSize);
+        result_array[(millis() - start_time_ms) / 1000] +=
+            udp.read(buff, packetSize);
     }
     Serial.printf("UDP download result:");
     printResultArray();
   } else if (TEST == UPLOAD) {
     while ((millis() - start_time_ms) / 1000 < MAX_PERIOD) {
       udp.beginPacket(hostIP, HOST_PORT);
-      udp.print(write_data);
+      udp.print(upload_buffer);
       udp.endPacket();
       delay(10); /// to avoid run time error
     }
@@ -231,9 +236,10 @@ void httpTest() {
                  "image/jpeg\r\n\r\n\n\n\n");
     client.flush();
     int i = 0;
-    while (client.connected() && (millis() - start_time_ms) / 1000 <= MAX_PERIOD) {
+    while (client.connected() &&
+           (millis() - start_time_ms) / 1000 <= MAX_PERIOD) {
       result_array[(millis() - start_time_ms) / 1000] +=
-          client.write(write_data, BUFF_SIZE);
+          client.write(upload_buffer, BUFF_SIZE);
       client.flush();
     }
     client.write("\r\n------------------------75717ac272b4c37a\r\n");
@@ -255,25 +261,40 @@ int next() {
 }
 
 void initArray() {
-  for (int i = 0; i < ARRAY_SIZE; i++)
+  for (int i = 0; i < TEST_SIZE; i++)
     result_array[i] = 0;
 }
 
+void generate_upload_data(char *buffer, int buffer_len) {
+
+  memset(buffer, '$', buffer_len - 2);
+  // NULL-Terminate the buffer.
+  buffer[buffer_len - 1] = '\0';
+}
+
 void setup() {
-  ESP.eraseConfig(); /// this makes esp faster
+  // Make esp work Faster.
+  ESP.eraseConfig();
+
+  // Starting Serial input for user comminiucation.
   Serial.begin(9600);
-  delay(10);                        /// waits for Serial to begin
-  digitalWrite(BUILT_IN_LED, HIGH); /// turn the LED off.
-  for (int i = 0; i < BUFF_SIZE; i++) {
-    write_data[i] = '$';
-  }
-  write_data[BUFF_SIZE - 1] = '\0';
-  bool ok = true;
-  if (setupWifi()) {
-    Serial.println("OK");
-    digitalWrite(BUILT_IN_LED, LOW); // turn the LED on.
+  // Waits for Serial to begin.
+  delay(10);
+
+  // Turn the LED off.
+  digitalWrite(BUILT_IN_LED, HIGH);
+
+  // Fill upload_buffer with random data.
+  generate_upload_data(upload_buffer, BUFF_SIZE);
+
+  if (setup_wifi()) {
+    Serial.println("Wifi connection is setup!");
+    // Turn the LED on.
+    // Show that the System is up and running.
+    digitalWrite(BUILT_IN_LED, LOW);
   }
 }
+
 void loop() {
   initArray();
   Serial.println("1: TCP\n2: UDP\n3: HTTP");
