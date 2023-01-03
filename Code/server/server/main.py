@@ -13,7 +13,7 @@ NUMBER_OF_PACKETS = 10
 FILE_SIZE = 512
 FILE_NAME = 'dummyFile'
 EMPTY_FILE_NAME = 'emptyDummyFile'
-PACKET_SIZE = 2123
+PACKET_SIZE = 2000
 
 
 def main():
@@ -71,7 +71,7 @@ def main():
                 port=PORT,
                 period=PERIOD,
                 upload=True,
-                packet_size=1,
+                packet_size=PACKET_SIZE,
             )
         else:
             # UDP, Latency
