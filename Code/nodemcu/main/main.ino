@@ -12,13 +12,12 @@
 
 #define LOCAL_UDP_PORT (10210) /// Local port to listen on.
 #define CONN_TIME_OUT (15)     /// Maximum time each test would take.
-#define UDP_DELAY_TIME 10       /// time between two UDP packet transfer.
+#define UDP_DELAY_TIME 10      /// time between two UDP packet transfer.
 #define MAX_PACKETS (10)       /// Maximum number of packet sent/received.
 
 IPAddress hostIP(185, 18, 214, 189); /// Server IP.
 #define HOST_IP ("185.18.214.189")   /// Server IP.
 #define HOST_PORT (9999)             /// Server port.
-
 
 #define HTTP_URL ("http://185.18.214.189:9999")
 #define HTTP_DOWNLOAD_PATH ("http://185.18.214.189:9999/dummyFile")
@@ -132,9 +131,15 @@ void tcp_test() {
   }
 }
 
-void sendSingleChar() {
+void upd_send_single_char() {
   udp.beginPacket(hostIP, HOST_PORT);
   udp.print("$");
+  udp.endPacket();
+}
+
+void udp_send_packet(char *buffer) {
+  udp.beginPacket(hostIP, HOST_PORT);
+  udp.print(buffer);
   udp.endPacket();
 }
 
@@ -144,7 +149,7 @@ void udp_test() {
   unsigned long start_time_ms = millis();
 
   udp.begin(LOCAL_UDP_PORT);
-  sendSingleChar();
+  upd_send_single_char();
 
   switch (TEST) {
   case DOWNLOAD:
@@ -161,9 +166,7 @@ void udp_test() {
     break;
   case UPLOAD:
     while ((millis() - start_time_ms) / 1000 < CONN_TIME_OUT) {
-      udp.beginPacket(hostIP, HOST_PORT);
-      udp.print(upload_buffer);
-      udp.endPacket();
+      udp_send_packet(upload_buffer);
       delay(UDP_DELAY_TIME); /// to avoid run time error
     }
     break;
@@ -171,15 +174,13 @@ void udp_test() {
     for (int i = 0; i < MAX_PACKETS; i++) {
       while (!udp.parsePacket())
         ;
-      sendSingleChar();
+      upd_send_single_char();
     }
     break;
   default:
     break;
   }
 }
-
-
 
 void http_test() {
 
