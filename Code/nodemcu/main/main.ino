@@ -23,7 +23,7 @@ IPAddress hostIP(185, 18, 214, 189); /// Server IP
 #define HTTP_UPLOAD_PATH ("http://185.18.214.189:9999/upload")
 
 #define BUFF_SIZE (2123) /// Size of buffer for reading from socket
-#define TEST_SIZE (30)  /// Number of samples
+#define TEST_SIZE (30)   /// Number of samples
 
 /// Protocols types
 enum Protocol {
@@ -44,7 +44,7 @@ int TEST = -1;
 
 WiFiUDP udp;
 char *buff = (char *)malloc(BUFF_SIZE);
-char *upload_data = (char *)malloc(BUFF_SIZE);
+char *upload_buffer = (char *)malloc(BUFF_SIZE);
 unsigned long start_time_ms;
 int result_array[TEST_SIZE];
 
@@ -101,7 +101,7 @@ void tcp() {
   } else if (TEST == UPLOAD) {
     while (client.connected()) {
       result_array[(millis() - start_time_ms) / 1000] +=
-          client.write(upload_data, BUFF_SIZE);
+          client.write(upload_buffer, BUFF_SIZE);
       client.flush();
     }
     Serial.printf("TCP upload result:");
@@ -111,7 +111,7 @@ void tcp() {
       while (client.connected() && !client.available())
         ;
       client.read(buff, BUFF_SIZE);
-      client.write(upload_data, 1);
+      client.write(upload_buffer, 1);
       client.flush();
     }
   }
@@ -142,7 +142,7 @@ void udpTest() {
   } else if (TEST == UPLOAD) {
     while ((millis() - start_time_ms) / 1000 < MAX_PERIOD) {
       udp.beginPacket(hostIP, HOST_PORT);
-      udp.print(upload_data);
+      udp.print(upload_buffer);
       udp.endPacket();
       delay(10); /// to avoid run time error
     }
@@ -236,7 +236,7 @@ void httpTest() {
     while (client.connected() &&
            (millis() - start_time_ms) / 1000 <= MAX_PERIOD) {
       result_array[(millis() - start_time_ms) / 1000] +=
-          client.write(upload_data, BUFF_SIZE);
+          client.write(upload_buffer, BUFF_SIZE);
       client.flush();
     }
     client.write("\r\n------------------------75717ac272b4c37a\r\n");
@@ -262,14 +262,13 @@ void initArray() {
     result_array[i] = 0;
 }
 
-void generate_upload_data(char* buffer,int buffer_len){
-  for(int i=0;i<buffer_len-1;i++){
-    buffer[i]='$';
+void generate_upload_data(char *buffer, int buffer_len) {
+  for (int i = 0; i < buffer_len - 1; i++) {
+    buffer[i] = '$';
   }
 
   // NULL-Terminate the buffer.
   buffer[buffer_len - 1] = '\0';
-
 }
 
 void setup() {
@@ -279,12 +278,12 @@ void setup() {
   /// Starting Serial input for user comminiucation.
   Serial.begin(9600);
   /// waits for Serial to begin.
-  delay(10);                        
+  delay(10);
 
   /// turn the LED off.
   digitalWrite(BUILT_IN_LED, HIGH);
 
-  generate_upload_data(upload_data, BUFF_SIZE);
+  generate_upload_data(upload_buffer, BUFF_SIZE);
   bool ok = true;
   if (setupWifi()) {
     Serial.println("OK");
