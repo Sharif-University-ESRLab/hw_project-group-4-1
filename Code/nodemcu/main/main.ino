@@ -96,24 +96,28 @@ void tcp_test() {
 
   switch (TEST) {
   case DOWNLOAD:
-    while (client.connected() && client.available()) {
-      result_array[(millis() - start_time_ms) / 1000] +=
-          client.read(buff, BUFF_SIZE);
+    while (client.connected()) {
+      while (client.connected() && !client.available())
+        ;
+      int bytes_read = client.read(buff, BUFF_SIZE);
+      unsigned long end_time_ms = millis();
+      result_array[(end_time_ms - start_time_ms) / 1000] += bytes_read;
     }
     Serial.printf("TCP download result:");
     printResultArray();
     break;
   case UPLOAD:
     while (client.connected()) {
-      result_array[(millis() - start_time_ms) / 1000] +=
-          client.write(upload_buffer, BUFF_SIZE);
+      int bytes_read = client.write(upload_buffer, BUFF_SIZE);
       client.flush();
+      unsigned long end_time_ms = millis();
+      result_array[(end_time_ms - start_time_ms) / 1000] += bytes_read;
     }
     Serial.printf("TCP upload result:");
     printResultArray();
     break;
   case LATENCY:
-    for (int i = 0; client.connected(); i++) {
+    while (client.connected()) {
       while (client.connected() && !client.available())
         ;
       client.read(buff, BUFF_SIZE);
