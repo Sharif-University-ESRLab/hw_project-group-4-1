@@ -6,7 +6,7 @@ from glogger.logger import get_logger
 logger = get_logger('tcp')
 
 
-def start(port: int):
+def start(port: int) -> socket.socket:
     """
     Starts a tcp socket on given port
 
