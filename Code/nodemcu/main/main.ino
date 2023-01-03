@@ -185,12 +185,13 @@ void udp_test() {
 void http_test() {
 
   unsigned long start_time_ms = millis();
-  if (TEST == DOWNLOAD) {
+  switch (TEST) {
+  case DOWNLOAD: {
     WiFiClient client;
     HTTPClient http;
     http.begin(client, HTTP_DOWNLOAD_PATH);
-    int httpCode = http.GET();
-    Serial.println(httpCode);
+    int http_code = http.GET();
+    Serial.println(http_code);
     int len = http.getSize();
     Serial.println(len);
     WiFiClient *stream = &client;
@@ -207,20 +208,23 @@ void http_test() {
     }
     Serial.printf("HTTP download result:");
     printResultArray();
-  } else if (TEST == LATENCY) {
+
+  } break;
+  case UPLOAD:
     for (int i = 0; i < 10; i++) {
       WiFiClient client;
       HTTPClient http;
       start_time_ms = millis();
       http.begin(client, HTTP_LATENCY_PATH);
-      int httpCode = http.GET();
+      int http_code = http.GET();
       result_array[i] = millis() - start_time_ms;
       Serial.printf("Result latency: %d\n", millis() - start_time_ms);
 
-      Serial.println(httpCode);
+      Serial.println(http_code);
     }
     printResultArray();
-  } else {
+    break;
+  case LATENCY: {
     Serial.println("Upload HTTP test");
     WiFiClient client;
     while (!client.connect(HOST_IP, HOST_PORT))
@@ -249,6 +253,10 @@ void http_test() {
     client.flush();
     Serial.printf("HTTP upload result:");
     printResultArray();
+
+  } break;
+  default:
+    break;
   }
 }
 
