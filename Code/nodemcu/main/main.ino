@@ -5,18 +5,21 @@
 
 
 #define BUILT_IN_LED (2)            /// GPID of built in led
-#define WIFI_WAIT_TIME (10000)      /// Wait time for connecting to wifi
-#define WIFI_DELAY (500)
-#define WIFI_SSID   ("Redmi 8A")      /// Hotspot SSID
-#define WIFI_PASS  ("Aa123QWE")      /// Hotspot Password
-#define LOCAL_UDP_PORT (10210)     /// local port to listen on
-#define MAX_PERIOD (15)
-#define MAX_PACKETS (10)
+
+#define WIFI_INIT_READY_DALY (10000)      /// Wait time for connecting to wifi
+#define WIFI_CONN_CHK_INTERVAL (500)      /// Interval for checking wifi connection
+#define WIFI_SSID   ("Redmi 8A")          /// Hotspot SSID
+#define WIFI_PASS  ("Aa123QWE")           /// Hotspot Password
+
+#define LOCAL_UDP_PORT (10210)      /// Local port to listen on
+#define MAX_PERIOD (15)             /// Maximum time each test would take
+#define MAX_PACKETS (10)            /// Maximum number of packet sent/received
 
 
-#define HOST_IP ("185.18.214.189")  /// Server ip
-IPAddress hostIP(185, 18, 214, 189);
+IPAddress hostIP(185, 18, 214, 189);  /// Server IP
+#define HOST_IP ("185.18.214.189")    /// Server IP
 #define HOST_PORT (9999)            /// Server port
+
 #define HTTP_URL ("http://185.18.214.189:9999")
 #define HTTP_DOWNLOAD_PATH ("http://185.18.214.189:9999/dummyFile")
 #define HTTP_LATENCY_PATH ("http://185.18.214.189:9999/emptyDummyFile")
@@ -24,18 +27,22 @@ IPAddress hostIP(185, 18, 214, 189);
 
 
 
-#define BUFF_SIZE (2123)             /// Size of buffer for reading from socket
-#define ARRAY_SIZE (30)             /// Size of array to store result
+#define BUFF_SIZE (2123)            /// Size of buffer for reading from socket
+#define ARRAY_SIZE (30)             /// Number of samples
 
-/// protocols types
-#define TCP (1)
-#define UDP (2)
-#define HTTP (3)
+/// Protocols types
+enum Protocol{
+    TCP=1,
+    UDP=2,
+    HTTP=3,
+}
 
-/// tests types
-#define DOWNLOAD (1)
-#define UPLOAD (2)
-#define LATENCY (3)
+/// Tests types
+enum TestType{
+  DOWNLOAD=1,
+  UPLOAD=2,
+  LATENCY=3,
+}
 
 // #define PROTOCOL (TCP)              /// protocol type
 // #define TEST (DOWNLOAD)             /// test type
@@ -55,9 +62,9 @@ bool setupWifi() {
   WiFi.begin(WIFI_SSID, WIFI_PASS);
   int i = 0;
   while (WiFi.status() != WL_CONNECTED) { // Wait for the Wi-Fi to connect
-    delay(WIFI_DELAY);
+    delay(WIFI_CONN_CHK_INTERVAL);
     Serial.print(++i); Serial.print(' ');
-    if (i == WIFI_WAIT_TIME / WIFI_DELAY) {
+    if (i == WIFI_INIT_READY_DALY / WIFI_CONN_CHK_INTERVAL) {
       Serial.println("Failed to connect");
       WiFi.disconnect();
       return false;
