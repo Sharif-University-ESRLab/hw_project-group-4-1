@@ -285,8 +285,10 @@ void setup() {
   generate_upload_data(upload_buffer, BUFF_SIZE);
 
   if (setup_wifi()) {
-    Serial.println("OK");
-    digitalWrite(BUILT_IN_LED, LOW); // turn the LED on.
+    Serial.println("Wifi connection is setup!");
+    // Turn the LED on.
+    // Show that the System is up and running. 
+    digitalWrite(BUILT_IN_LED, LOW); 
   }
 }
 
