@@ -11,7 +11,7 @@
 #define WIFI_PASS ("Aa123QWE")       /// Hotspot Password
 
 #define LOCAL_UDP_PORT (10210) /// Local port to listen on
-#define MAX_PERIOD (15)        /// Maximum time each test would take
+#define CONN_TIME_OUT (15)     /// Maximum time each test would take
 #define MAX_PACKETS (10)       /// Maximum number of packet sent/received
 
 IPAddress hostIP(185, 18, 214, 189); /// Server IP
@@ -137,34 +137,43 @@ void sendSingleChar() {
 }
 
 void udp_test() {
-  /// Initialize udp
+
+  // Capture start time
   unsigned long start_time_ms = millis();
+
   udp.begin(LOCAL_UDP_PORT);
   sendSingleChar();
 
-  if (TEST == DOWNLOAD) {
-    while ((millis() - start_time_ms) / 1000 < MAX_PERIOD) {
+  switch (TEST) {
+  case DOWNLOAD:
+    while ((millis() - start_time_ms) / 1000 < CONN_TIME_OUT) {
       uint16_t packetSize = udp.parsePacket();
-      /// result_array[(millis()-st)/1000] += packetSize;
-      if (packetSize)
-        result_array[(millis() - start_time_ms) / 1000] +=
-            udp.read(buff, packetSize);
+      unsigned long end_time_ms = millis();
+      if (packetSize) {
+        int bytes_read = udp.read(buff, packetSize);
+        result_array[(end_time_ms - start_time_ms) / 1000] += bytes_read;
+      }
     }
     Serial.printf("UDP download result:");
     printResultArray();
-  } else if (TEST == UPLOAD) {
-    while ((millis() - start_time_ms) / 1000 < MAX_PERIOD) {
+    break;
+  case UPLOAD:
+    while ((millis() - start_time_ms) / 1000 < CONN_TIME_OUT) {
       udp.beginPacket(hostIP, HOST_PORT);
       udp.print(upload_buffer);
       udp.endPacket();
       delay(10); /// to avoid run time error
     }
-  } else {
+    break;
+  case LATENCY:
     for (int i = 0; i < MAX_PACKETS; i++) {
       while (!udp.parsePacket())
         ;
       sendSingleChar();
     }
+    break;
+  default:
+    break;
   }
 }
 
@@ -202,7 +211,7 @@ void http_test() {
     Serial.println(len);
     WiFiClient *stream = &client;
     while (http.connected() && (len > 0 || len == -1) &&
-           (millis() - start_time_ms) / 1000 <= MAX_PERIOD) {
+           (millis() - start_time_ms) / 1000 <= CONN_TIME_OUT) {
       int c = stream->readBytes(buff, (size_t)min(len, BUFF_SIZE));
       if (!c) {
         Serial.println("read timeout");
@@ -247,7 +256,7 @@ void http_test() {
     client.flush();
     int i = 0;
     while (client.connected() &&
-           (millis() - start_time_ms) / 1000 <= MAX_PERIOD) {
+           (millis() - start_time_ms) / 1000 <= CONN_TIME_OUT) {
       result_array[(millis() - start_time_ms) / 1000] +=
           client.write(upload_buffer, BUFF_SIZE);
       client.flush();
