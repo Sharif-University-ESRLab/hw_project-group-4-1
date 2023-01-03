@@ -46,7 +46,6 @@ int TEST = -1;
 WiFiUDP udp;
 char *buff = (char *)malloc(BUFF_SIZE);
 char *upload_buffer = (char *)malloc(BUFF_SIZE);
-unsigned long start_time_ms;
 int result_array[TEST_SIZE];
 
 /// Connect to wifi
@@ -86,40 +85,48 @@ void printResultArray() {
 }
 
 void tcp_test() {
-  /// Init variables
-  start_time_ms = millis();
+  // Capture start time
+  unsigned long start_time_ms = millis();
 
   /// Connecting to server
   WiFiClient client;
   while (!client.connect(HOST_IP, HOST_PORT))
-    ; // connect to server
+    ;
   Serial.println("Connected to server");
 
-  if (TEST == DOWNLOAD) {
+  switch (TEST) {
+  case DOWNLOAD:
     while (client.connected()) {
-      if (client.available()) {
-        result_array[(millis() - start_time_ms) / 1000] +=
-            client.read(buff, BUFF_SIZE);
-      }
+      while (client.connected() && !client.available())
+        ;
+      int bytes_read = client.read(buff, BUFF_SIZE);
+      unsigned long end_time_ms = millis();
+      result_array[(end_time_ms - start_time_ms) / 1000] += bytes_read;
     }
     Serial.printf("TCP download result:");
     printResultArray();
-  } else if (TEST == UPLOAD) {
+    break;
+  case UPLOAD:
     while (client.connected()) {
-      result_array[(millis() - start_time_ms) / 1000] +=
-          client.write(upload_buffer, BUFF_SIZE);
+      int bytes_read = client.write(upload_buffer, BUFF_SIZE);
       client.flush();
+      unsigned long end_time_ms = millis();
+      result_array[(end_time_ms - start_time_ms) / 1000] += bytes_read;
     }
     Serial.printf("TCP upload result:");
     printResultArray();
-  } else {
-    for (int i = 0; client.connected(); i++) {
+    break;
+  case LATENCY:
+    while (client.connected()) {
       while (client.connected() && !client.available())
         ;
       client.read(buff, BUFF_SIZE);
       client.write(upload_buffer, 1);
       client.flush();
     }
+    break;
+  default:
+    break;
   }
 }
 
@@ -131,7 +138,7 @@ void sendSingleChar() {
 
 void udp_test() {
   /// Initialize udp
-  start_time_ms = millis();
+  unsigned long start_time_ms = millis();
   udp.begin(LOCAL_UDP_PORT);
   sendSingleChar();
 
@@ -184,7 +191,7 @@ void progressf(int percent) { Serial.printf("%d\n", percent); }
 
 void http_test() {
 
-  start_time_ms = millis();
+  unsigned long start_time_ms = millis();
   if (TEST == DOWNLOAD) {
     WiFiClient client;
     HTTPClient http;
@@ -280,6 +287,7 @@ void setup() {
   delay(10);
 
   // Turn the LED off.
+  pinMode(BUILT_IN_LED, OUTPUT);
   digitalWrite(BUILT_IN_LED, HIGH);
 
   // Fill upload_buffer with random data.
@@ -292,7 +300,7 @@ void setup() {
     digitalWrite(BUILT_IN_LED, LOW);
   }
 }
-void show_menu(){
+void show_menu() {
   Serial.println("1: TCP\n2: UDP\n3: HTTP");
   while (Serial.available() == 0)
     ;
@@ -302,25 +310,24 @@ void show_menu(){
     ;
   TEST = next();
   Serial.printf("P: %d T: %d\n", PROTOCOL, TEST);
-
 }
 void loop() {
   memset(result_array, 0, TEST_SIZE);
   show_menu();
 
   switch (PROTOCOL) {
-    case TCP:
-      tcp_test();
-      break;
-    case UDP:
-      udp_test();
-      break;
-    case HTTP:
-      http_test();
-      break;
-    default:
-      Serial.println("protocol not supported! pleas try again");
-      break;
+  case TCP:
+    tcp_test();
+    break;
+  case UDP:
+    udp_test();
+    break;
+  case HTTP:
+    http_test();
+    break;
+  default:
+    Serial.println("protocol not supported! pleas try again");
+    break;
   }
   Serial.println("\nDone");
 }
