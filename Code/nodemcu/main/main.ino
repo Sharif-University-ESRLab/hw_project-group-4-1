@@ -367,11 +367,15 @@ void setup() {
   }
 }
 void show_menu() {
-  Serial.println("1: TCP\n2: UDP\n3: HTTP");
+  Serial.println("1: TCP");
+  Serial.println("2: UDP");
+  Serial.println("3: HTTP");
   while (Serial.available() == 0)
     ;
   PROTOCOL = next();
-  Serial.println("1: Download\n2: Upload\n3: Latency");
+  Serial.println("1: Download");
+  Serial.println("2: Upload");
+  Serial.println("3: Latency");
   while (Serial.available() == 0)
     ;
   TEST = next();
