@@ -6,27 +6,34 @@ import pickle
 import ssl
 import time
 from collections import deque
-from typing import BinaryIO, Callable, Deque, Dict, List, Optional, Union, cast
+from typing import BinaryIO
+from typing import Callable
+from typing import cast
+from typing import Deque
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Union
 from urllib.parse import urlparse
 
-import wsproto
-import wsproto.events
-
 import aioquic
+import wsproto.events
 from aioquic.asyncio.client import connect
 from aioquic.asyncio.protocol import QuicConnectionProtocol
-from aioquic.h0.connection import H0_ALPN, H0Connection
-from aioquic.h3.connection import H3_ALPN, ErrorCode, H3Connection
-from aioquic.h3.events import (
-    DataReceived,
-    H3Event,
-    HeadersReceived,
-    PushPromiseReceived,
-)
+from aioquic.h0.connection import H0_ALPN
+from aioquic.h0.connection import H0Connection
+from aioquic.h3.connection import ErrorCode
+from aioquic.h3.connection import H3_ALPN
+from aioquic.h3.connection import H3Connection
+from aioquic.h3.events import DataReceived
+from aioquic.h3.events import H3Event
+from aioquic.h3.events import HeadersReceived
+from aioquic.h3.events import PushPromiseReceived
 from aioquic.quic.configuration import QuicConfiguration
 from aioquic.quic.events import QuicEvent
 from aioquic.quic.logger import QuicFileLogger
-from aioquic.tls import CipherSuite, SessionTicket
+from aioquic.tls import CipherSuite
+from aioquic.tls import SessionTicket
 
 try:
     import uvloop

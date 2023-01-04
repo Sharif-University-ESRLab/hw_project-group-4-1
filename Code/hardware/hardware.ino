@@ -2,7 +2,7 @@
  *  Please see the "LTE_Demo" sketch which supports many other SIMCom 2G, 3G modules; this sketch
  *  takes up less memory than the LTE_Demo sketch and is therefore suitable for microcontrollers
  *  like the ATmega32u4.
- *  
+ *
  *  Author: Timothy Woo (www.botletics.com)
  *  Github: https://github.com/botletics/SIM7000-LTE-Shield
  *  Last Updated: 7/4/2022
@@ -48,7 +48,7 @@
   #define TX 10 // Microcontroller RX
   #define RX 11 // Microcontroller TX
   //#define T_ALERT 12 // Connect with solder jumper
-  
+
 #elif defined(SIMCOM_7500) || defined(SIMCOM_7600)
 // For botletics SIM7500 shield
   #define BOTLETICS_PWRKEY 6
@@ -64,7 +64,7 @@
 char replybuffer[255];
 
 // We default to using software serial. If you want to use hardware serial
-// (because softserial isnt supported) comment out the following three lines 
+// (because softserial isnt supported) comment out the following three lines
 // and uncomment the HardwareSerial line
 #include <SoftwareSerial.h>
 SoftwareSerial modemSS = SoftwareSerial(TX, RX);
@@ -92,7 +92,7 @@ void setup() {
 
   pinMode(RST, OUTPUT);
   digitalWrite(RST, HIGH); // Default state
-  
+
   // Turn on the module by pulsing PWRKEY low for a little bit
   // This amount of time depends on the specific module that's used
   modem.powerOn(BOTLETICS_PWRKEY);
@@ -141,7 +141,7 @@ void setup() {
     while(1); // Don't proceed if it couldn't find the device
   }
   */
-  
+
   type = modem.type();
   Serial.println(F("Modem is OK"));
   Serial.print(F("Found "));
@@ -157,7 +157,7 @@ void setup() {
     default:
       Serial.println(F("???")); break;
   }
-  
+
   // Print module IMEI number.
   uint8_t imeiLen = modem.getIMEI(imei);
   if (imeiLen > 0) {
@@ -189,7 +189,7 @@ void setup() {
   modem.setOperatingBand("CAT-M", 12); // AT&T uses band 12
 //  modem.setOperatingBand("CAT-M", 13); // Verizon uses band 13
   modem.enableRTC(true);
-  
+
   modem.enableSleepMode(true);
   modem.set_eDRX(1, 4, "0010");
   modem.enablePSM(true);
@@ -211,14 +211,14 @@ void printMenu(void) {
   Serial.println(F("[U] Unlock SIM with PIN code"));
   Serial.println(F("[i] Read signal strength (RSSI)"));
   Serial.println(F("[n] Get network status"));
-  
+
 #if defined(SIMCOM_7500) || defined(SIMCOM_7600)
   // Audio/Volume
   Serial.println(F("[v] Set audio Volume"));
   Serial.println(F("[V] Get volume"));
   Serial.println(F("[H] Set headphone audio"));
   Serial.println(F("[e] Set external audio"));
-#endif  
+#endif
 
   // Phone
   Serial.println(F("[c] Make phone Call"));
@@ -233,7 +233,7 @@ void printMenu(void) {
   Serial.println(F("[d] Delete SMS #"));
   Serial.println(F("[D] Delete all SMS"));
   Serial.println(F("[s] Send SMS"));
-  
+
   // Time
   Serial.println(F("[y] Enable local time stamp"));
   Serial.println(F("[Y] Enable NTP time sync")); // Need to use "G" command first!
@@ -245,8 +245,8 @@ void printMenu(void) {
 //  Serial.println(F("[w] Read webpage (GPRS)"));
 //  Serial.println(F("[W] Post to website (GPRS)"));
   Serial.println(F("[1] Get connection info")); // See what connection type and band you're on!
-  
-  // The following option below posts dummy data to dweet.io for demonstration purposes. See the 
+
+  // The following option below posts dummy data to dweet.io for demonstration purposes. See the
   // IoT_example sketch for an actual application of this function!
 #if defined(SIMCOM_7000) || defined(SIMCOM_7070)
   Serial.println(F("[2] Post to dweet.io - LTE CAT-M / NB-IoT")); // SIM7000/7070
@@ -258,7 +258,7 @@ void printMenu(void) {
   Serial.println(F("[O] Turn GPS on)"));
   Serial.println(F("[o] Turn GPS off"));
   Serial.println(F("[L] Query GPS location"));
-  
+
 //  Serial.println(F("[S] Create serial passthru tunnel"));
   Serial.println(F("-------------------------------------"));
   Serial.println(F(""));
@@ -452,7 +452,7 @@ void loop() {
         }
         break;
       }
-      
+
     case 'h': {
         // hang up!
         if (! modem.hangUp()) {
@@ -647,7 +647,7 @@ void loop() {
           Serial.println(F("Reply in format: [<lat>],[<N/S>],[<lon>],[<E/W>],[<date>],[<UTC time>(yyyymmddHHMMSS)],[<alt>],[<speed>],[<course>]"));
         else
           Serial.println(F("Reply in format: mode,fixstatus,utctime(yyyymmddHHMMSS),latitude,longitude,altitude,speed,course,fixmode,reserved1,HDOP,PDOP,VDOP,reserved2,view_satellites,used_satellites,reserved3,C/N0max,HPA,VPA"));
-        
+
         Serial.println(gpsdata);
 
         break;
@@ -696,7 +696,7 @@ void loop() {
         #if defined(SIMCOM_7500) || defined(SIMCOM_7600)
           modem.enableGPRS(false);
         #endif
-        
+
         // turn GPRS on
         if (!modem.enableGPRS(true))
           Serial.println(F("Failed to turn on"));
@@ -784,16 +784,16 @@ void loop() {
 */
     case '1': {
         // Get connection type, cellular band, carrier name, etc.
-        modem.getNetworkInfo();        
+        modem.getNetworkInfo();
         break;
       }
 
 #if defined(SIMCOM_2G) || defined(SIMCOM_7000) || defined(SIMCOM_7070)
     case '2': {
         // Post data to website via 2G or LTE CAT-M/NB-IoT
-        
+
         float temperature = analogRead(A0)*1.23; // Change this to suit your needs
-        
+
         uint16_t battLevel;
         if (! modem.getBattVoltage(&battLevel)) battLevel = 3800; // Use dummy voltage if can't read
 
@@ -802,7 +802,7 @@ void loop() {
         char URL[150];
         char body[100];
         char tempBuff[16];
-      
+
         // Format the floating point numbers as needed
         dtostrf(temperature, 1, 2, tempBuff); // float_val, min_width, digits_after_decimal, char_buffer
 
@@ -812,7 +812,7 @@ void loop() {
             // modem.HTTP_addHeader("Cache-control", "no-cache", 8);
             // modem.HTTP_addHeader("Connection", "keep-alive", 10);
             // modem.HTTP_addHeader("Accept", "*/*, 3);
-            
+
             // Connect to server
             // If https:// is used, #define BOTLETICS_SSL 1 in Botletics_modem.h
             if (! modem.HTTP_connect("http://dweet.io")) {
@@ -840,34 +840,34 @@ void loop() {
         #else
             // Construct the appropriate URL's and body, depending on request type
             // Use IMEI as device ID for this example
-            
+
             // GET request
             sprintf(URL, "dweet.io/dweet/for/%s?temp=%s&batt=%i", imei, tempBuff, battLevel); // No need to specify http:// or https://
     //        sprintf(URL, "http://dweet.io/dweet/for/%s?temp=%s&batt=%i", imei, tempBuff, battLevel); // But this works too
 
             if (!modem.postData("GET", URL))
               Serial.println(F("Failed to complete HTTP GET..."));
-            
+
             // POST request
             /*
             sprintf(URL, "http://dweet.io/dweet/for/%s", imei);
             sprintf(body, "{\"temp\":%s,\"batt\":%i}", tempBuff, battLevel);
-            
+
             if (!modem.postData("POST", URL, body)) // Can also add authorization token parameter!
               Serial.println(F("Failed to complete HTTP POST..."));
             */
-          
+
         #endif
 
         break;
       }
 #endif
-      
+
 #if defined(SIMCOM_7500) || defined(SIMCOM_7600)
     case '3': {
         // Post data to website via 3G or 4G LTE
         float temperature = analogRead(A0)*1.23; // Change this to suit your needs
-        
+
         uint16_t battLevel;
         if (! modem.getBattVoltage(&battLevel)) battLevel = 3800; // Use dummy voltage if can't read
 
@@ -875,19 +875,19 @@ void loop() {
         // Make sure these buffers are long enough for your request URL
         char URL[150];
         char tempBuff[12];
-      
+
         // Format the floating point numbers as needed
         dtostrf(temperature, 1, 2, tempBuff); // float_val, min_width, digits_after_decimal, char_buffer
 
         // Construct the appropriate URL's and body, depending on request type
         // Use IMEI as device ID for this example
-        
+
         // GET request
         sprintf(URL, "GET /dweet/for/%s?temp=%s&batt=%i HTTP/1.1\r\nHost: dweet.io\r\nContent-Length: 0\r\n\r\n", imei, tempBuff, battLevel);
 
         if (!modem.postData("www.dweet.io", 443, "HTTPS", URL)) // Server, port, connection type, URL
           Serial.println(F("Failed to complete HTTP/HTTPS request..."));
-      
+
         break;
       }
 #endif

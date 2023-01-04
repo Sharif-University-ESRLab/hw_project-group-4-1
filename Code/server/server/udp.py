@@ -4,7 +4,7 @@ from typing import Tuple
 
 from glogger.logger import get_logger
 
-logger = get_logger('udp')
+logger = get_logger("udp")
 
 
 def start(port: int) -> Tuple[socket.socket, Tuple[str, int]]:
@@ -16,7 +16,7 @@ def start(port: int) -> Tuple[socket.socket, Tuple[str, int]]:
     """
     logger.info("Waiting for udp socket")
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.bind(('0.0.0.0', port))  # Bind to 0.0.0.0:port
+    s.bind(("0.0.0.0", port))  # Bind to 0.0.0.0:port
     # Waits for new client to connect and send 1 byte of data
     while True:
         data, addr = s.recvfrom(1)
@@ -51,7 +51,7 @@ def start_throughput(port: int, period: int, upload: bool, packet_size: int) -> 
             bytes_cnt[int(total)] += len(data)
         else:
             # Sends `packet_size` bytes of data
-            conn.sendto(b'*' * packet_size, addr)
+            conn.sendto(b"*" * packet_size, addr)
             bytes_cnt[int(total)] += packet_size
     logger.info("Result: %s", bytes_cnt)
     conn.close()  # Close connection
@@ -71,7 +71,7 @@ def start_latency(port: int, number_of_packets: int) -> List[int]:
     for i in range(number_of_packets):
         # Sends 1 byte of data and wait for 1 byte of data to receive
         now = datetime.datetime.now()
-        conn.sendto(b'$', addr)
+        conn.sendto(b"$", addr)
         conn.recv(1)
         result.append(int((datetime.datetime.now() - now).total_seconds() * 1_000))
     conn.close()  # Close connection

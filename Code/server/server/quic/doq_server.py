@@ -2,15 +2,17 @@ import argparse
 import asyncio
 import logging
 import struct
-from typing import Dict, Optional
+from typing import Dict
+from typing import Optional
 
-from dnslib.dns import DNSRecord
-
-from aioquic.asyncio import QuicConnectionProtocol, serve
+from aioquic.asyncio import QuicConnectionProtocol
+from aioquic.asyncio import serve
 from aioquic.quic.configuration import QuicConfiguration
-from aioquic.quic.events import QuicEvent, StreamDataReceived
+from aioquic.quic.events import QuicEvent
+from aioquic.quic.events import StreamDataReceived
 from aioquic.quic.logger import QuicFileLogger
 from aioquic.tls import SessionTicket
+from dnslib.dns import DNSRecord
 
 
 class DnsServerProtocol(QuicConnectionProtocol):

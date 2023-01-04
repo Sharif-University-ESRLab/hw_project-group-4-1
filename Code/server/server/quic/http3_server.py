@@ -5,25 +5,32 @@ import logging
 import time
 from collections import deque
 from email.utils import formatdate
-from typing import Callable, Deque, Dict, List, Optional, Union, cast
-
-import wsproto
-import wsproto.events
+from typing import Callable
+from typing import cast
+from typing import Deque
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Union
 
 import aioquic
-from aioquic.asyncio import QuicConnectionProtocol, serve
-from aioquic.h0.connection import H0_ALPN, H0Connection
-from aioquic.h3.connection import H3_ALPN, H3Connection
-from aioquic.h3.events import (
-    DatagramReceived,
-    DataReceived,
-    H3Event,
-    HeadersReceived,
-    WebTransportStreamDataReceived,
-)
+import wsproto.events
+from aioquic.asyncio import QuicConnectionProtocol
+from aioquic.asyncio import serve
+from aioquic.h0.connection import H0_ALPN
+from aioquic.h0.connection import H0Connection
+from aioquic.h3.connection import H3_ALPN
+from aioquic.h3.connection import H3Connection
+from aioquic.h3.events import DatagramReceived
+from aioquic.h3.events import DataReceived
+from aioquic.h3.events import H3Event
+from aioquic.h3.events import HeadersReceived
+from aioquic.h3.events import WebTransportStreamDataReceived
 from aioquic.h3.exceptions import NoAvailablePushIDError
 from aioquic.quic.configuration import QuicConfiguration
-from aioquic.quic.events import DatagramFrameReceived, ProtocolNegotiated, QuicEvent
+from aioquic.quic.events import DatagramFrameReceived
+from aioquic.quic.events import ProtocolNegotiated
+from aioquic.quic.events import QuicEvent
 from aioquic.quic.logger import QuicFileLogger
 from aioquic.tls import SessionTicket
 

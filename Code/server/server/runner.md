@@ -21,4 +21,3 @@ python server/main.py -p http
 ```
 python server/quic/http3_server.py --certificate cert.pem --private-key cert.key
 ```
-

@@ -2,12 +2,14 @@ import argparse
 import asyncio
 import logging
 import ssl
-from typing import Optional, cast
+from typing import cast
+from typing import Optional
 
 from aioquic.asyncio.client import connect
 from aioquic.asyncio.protocol import QuicConnectionProtocol
 from aioquic.quic.configuration import QuicConfiguration
-from aioquic.quic.events import DatagramFrameReceived, QuicEvent
+from aioquic.quic.events import DatagramFrameReceived
+from aioquic.quic.events import QuicEvent
 from aioquic.quic.logger import QuicFileLogger
 
 logger = logging.getLogger("client")
