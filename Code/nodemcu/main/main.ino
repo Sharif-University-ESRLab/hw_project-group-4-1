@@ -25,10 +25,7 @@ IPAddress hostIP(185, 18, 214, 189); /// Server IP.
 #define HTTP_UPLOAD_PATH ("http://185.18.214.189:9999/upload")
 
 #define BUFF_SIZE (512) /// Size of buffer for reading from socket
-#define TEST_SIZE (30)   /// Number of samples
-
-char* upload_buffer = (char *)malloc(BUFF_SIZE);
-char* download_buffer = (char *)malloc(BUFF_SIZE);
+#define TEST_SIZE (30)  /// Number of samples
 
 /// Protocols types
 enum Protocol {
@@ -87,8 +84,9 @@ void printResultArray() {
 
 void tcp_test() {
 
-  char upload_buffer [BUFF_SIZE];
-  char download_buffer[BUFF_SIZE];;
+  char upload_buffer[BUFF_SIZE];
+  char download_buffer[BUFF_SIZE];
+  ;
 
   // Fill upload_buffer with random data.
   generate_upload_data(upload_buffer, BUFF_SIZE);
@@ -112,7 +110,8 @@ void tcp_test() {
   /// and thus, some indices in the resulting array might be zero.
   case DOWNLOAD:
     while (client.connected()) {
-      while (client.connected() && !client.available());
+      while (client.connected() && !client.available())
+        ;
       int bytes_read = client.read(download_buffer, BUFF_SIZE);
       unsigned long end_time_ms = millis();
       result_array[(end_time_ms - start_time_ms) / 1000] += bytes_read;
@@ -170,7 +169,10 @@ void udp_send_packet(WiFiUDP *udp, char *buffer) {
 }
 
 void udp_test() {
+  char *upload_buffer = (char *)malloc(BUFF_SIZE);
+  char *download_buffer = (char *)malloc(BUFF_SIZE);
 
+  // Fill upload_buffer with random data.
   generate_upload_data(upload_buffer, BUFF_SIZE);
 
   // Handler for UDP connection.
@@ -185,7 +187,6 @@ void udp_test() {
   // Sign server that we are ready to start the experiment.
   // we do this by sending a single $ character.
   udp_send_single_char(&udp);
-  
 
   switch (TEST) {
   /// In this case, we send as much packet as we can in a
@@ -194,12 +195,13 @@ void udp_test() {
   /// further analyzes.
   case DOWNLOAD:
     while ((millis() - start_time_ms) / 1000 < CONN_TIME_OUT) {
-      
+
       uint16_t packetSize = udp.parsePacket();
       unsigned long end_time_ms = millis();
-      
+
       if (packetSize) {
-        int bytes_read = udp.read(download_buffer, min(packetSize, (uint16_t) BUFF_SIZE));
+        int bytes_read =
+            udp.read(download_buffer, min(packetSize, (uint16_t)BUFF_SIZE));
         result_array[(end_time_ms - start_time_ms) / 1000] += bytes_read;
       }
     }
@@ -233,10 +235,15 @@ void udp_test() {
   default:
     break;
   }
+
+  // clean up
+  free(upload_buffer);
+  free(download_buffer);
 }
 
 void http_test() {
-
+  char *upload_buffer = (char *)malloc(BUFF_SIZE);
+  char *download_buffer = (char *)malloc(BUFF_SIZE);
 
   // Fill upload_buffer with random data.
   generate_upload_data(upload_buffer, BUFF_SIZE);
@@ -315,6 +322,10 @@ void http_test() {
   default:
     break;
   }
+
+  // clean up
+  free(upload_buffer);
+  free(download_buffer);
 }
 
 /// Read 1-digit integer from input
